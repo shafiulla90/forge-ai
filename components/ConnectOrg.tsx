@@ -1,182 +1,241 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { 
   Cloud, 
   CheckCircle2, 
-  Plus,
+  Terminal, 
+  ArrowRight, 
+  Loader2, 
+  Server, 
+  Settings, 
+  KeyRound, 
+  AlertCircle 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const orgTypes = [
-  { id: 'production', name: 'Production', desc: 'Live org' },
-  { id: 'sandbox', name: 'Sandbox', desc: 'Test env' },
-  { id: 'developer', name: 'Developer', desc: 'Dev Edition' },
-  { id: 'scratch', name: 'Scratch', desc: 'SFDX' },
-];
-
-const permissions = [
-  "Read metadata (all objects, fields, Apex, Flows)",
-  "Deploy metadata (after your approval)",
-  "Run Apex tests post-deployment",
-  "No data access — metadata only"
-];
+interface SfdxOrg {
+  username: string;
+  aliases: string[];
+  instanceUrl: string;
+  orgId: string;
+  loginUrl: string;
+  isDevHub: boolean;
+}
 
 export function ConnectOrg() {
-  const searchParams = useSearchParams();
-  const stage = searchParams ? searchParams.get('stage') || '' : '';
-  const initialType = stage === 'qa' || stage === 'uat' ? 'sandbox' : 'production';
+  const router = useRouter();
+  const [orgs, setOrgs] = useState<SfdxOrg[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [connectingUser, setConnectingUser] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const [selectedType, setSelectedType] = useState(initialType);
-  const [alias, setAlias] = useState('');
-  
-  // Defer rendering to client-side to prevent password manager extension hydration errors
-  const [isMounted, setIsMounted] = useState(false);
+  // Fetch local SFDX orgs on mount
   useEffect(() => {
-    setIsMounted(true);
+    async function fetchOrgs() {
+      try {
+        const res = await fetch('/api/auth/sfdx-orgs');
+        const data = await res.json();
+        if (data.success) {
+          setOrgs(data.orgs || []);
+        } else {
+          setError(data.error || 'Failed to scan SFDX directory');
+        }
+      } catch (err: any) {
+        setError('Error connecting to local SFDX detector API');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchOrgs();
   }, []);
 
-  if (!isMounted) {
-    return <div className="flex-1 bg-[#020817] min-h-screen" />;
-  }
+  const handleConnectSfdx = async (username: string) => {
+    setConnectingUser(username);
+    setError(null);
+    setStatusMessage('Reading local credentials...');
 
-  const handleConnect = () => {
-    window.location.href = '/setup';
+    try {
+      // Step 1: Read and decrypt local token
+      setTimeout(() => setStatusMessage('Decrypting token with local keychain...'), 1000);
+      
+      // Step 2: Establish connection and register in database
+      setTimeout(() => setStatusMessage('Registering organization and querying metadata...'), 2500);
+
+      const response = await fetch('/api/auth/sfdx-connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.orgId) {
+        setStatusMessage('Authentication successful! Opening dashboard...');
+        setTimeout(() => {
+          router.push(`/dashboard?orgId=${result.orgId}`);
+        }, 1000);
+      } else {
+        setError(result.error || 'Failed to connect org');
+        setConnectingUser(null);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred during connection');
+      setConnectingUser(null);
+    }
+  };
+
+  const handleFallbackOAuth = () => {
+    window.location.href = '/api/auth/salesforce';
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center pt-8 pb-6 px-6 bg-[#020817] min-h-screen overflow-y-auto">
-      <div className="w-full max-w-[480px] flex flex-col gap-5">
+    <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-12 px-6 bg-[#020817] min-h-screen text-white overflow-y-auto">
+      <div className="w-full max-w-[560px] flex flex-col gap-6">
         
-        {/* Header Section */}
-        <div className="flex flex-col items-center text-center gap-1">
-          <h1 className="text-[36px] font-black tracking-tighter text-[#00a1e0] leading-none">
-            Forge
+        {/* Header */}
+        <div className="flex flex-col items-center text-center gap-1.5 animate-in fade-in slide-in-from-top-4 duration-700">
+          <h1 className="text-[42px] font-black tracking-tighter text-[#00a1e0] leading-none">
+            Forge AI
           </h1>
-          <p className="text-white/30 text-[10px] uppercase tracking-[0.2em] font-bold mt-1">
-            Forge — Build anything in Salesforce
+          <p className="text-white/40 text-[10px] uppercase tracking-[0.25em] font-bold mt-1">
+            Zero-Key Salesforce Connection
           </p>
-          <p className="max-w-sm text-white/30 text-[11px] leading-relaxed mt-1.5 font-medium">
-            Connect your Salesforce org. AI reads your entire setup and implements anything you describe — in plain English.
+          <p className="max-w-md text-white/50 text-[12px] leading-relaxed mt-2 font-medium">
+            Forge AI detected your local Salesforce CLI environment. Select a configured org to connect instantly without entering credentials or OAuth client keys.
           </p>
         </div>
 
-        {/* Main Connect Card */}
-        <div className="bg-[#0b1120] border border-white/5 rounded-xl shadow-2xl overflow-hidden">
-          {/* Card Header Bar */}
-          <div className="bg-[#1e293b]/30 border-b border-white/5 px-5 py-3">
-            <h2 className="text-[15px] font-bold text-white tracking-tight">
-              Connect Salesforce Org
-            </h2>
-            <p className="text-[9px] text-[#00a1e0] font-bold uppercase tracking-widest mt-0.5">
-              SFDX CLI • Secure Local Connection
-            </p>
-          </div>
-
-          <div className="p-5 flex flex-col gap-4">
-            {/* Org Type Grid */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold text-white/25 uppercase tracking-[0.15em]">
-                SELECT ORG TYPE
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {orgTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    suppressHydrationWarning={true}
-                    onClick={() => setSelectedType(type.id)}
-                    className={cn(
-                      "flex flex-col items-center gap-0.5 py-2.5 px-2 rounded-lg border transition-all",
-                      selectedType === type.id
-                        ? "bg-[#1e293b] border-white/20 text-white"
-                        : "bg-black/20 border-white/5 text-white/25 hover:border-white/10"
-                    )}
-                  >
-                    <span className="text-[11px] font-bold tracking-tight">{type.name}</span>
-                    <span className="text-[8px] font-semibold opacity-50 uppercase">{type.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Alias Input */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold text-white/25 uppercase tracking-[0.15em]">
-                ORG ALIAS (optional)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Acme Production"
-                value={alias}
-                onChange={(e) => setAlias(e.target.value)}
-                className="w-full bg-black/20 border border-white/5 rounded-lg px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-white/10 transition-all placeholder:text-white/10 font-medium"
-              />
-            </div>
-
-            {/* Action Button */}
-            <button
-              suppressHydrationWarning={true}
-              onClick={handleConnect}
-              className="w-full py-3 bg-[#00a1e0] hover:bg-[#008cc2] text-white rounded-lg font-bold text-[13px] shadow-lg transition-all flex items-center justify-center gap-2 group"
-            >
-              <Cloud className="w-4 h-4" />
-              Connect via Local SFDX CLI
-            </button>
-
-            {/* Permissions Info */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[9px] font-bold text-white/25 uppercase tracking-[0.15em]">
-                PERMISSIONS REQUESTED
-              </label>
-              <div className="flex flex-col gap-1">
-                {permissions.map((perm) => (
-                  <div key={perm} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3 h-3 text-[#3fb950] shrink-0" />
-                    <span className="text-[10px] font-medium text-[#3fb950]/80">{perm}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Connection Status / Loader */}
+        {connectingUser && (
+          <div className="bg-[#0b1120] border border-[#00a1e0]/20 rounded-2xl p-6 flex flex-col items-center text-center gap-4 shadow-[0_0_50px_rgba(0,161,224,0.05)] animate-in zoom-in-95 duration-300">
+            <Loader2 className="w-10 h-10 text-[#00a1e0] animate-spin" />
+            <div className="flex flex-col gap-1">
+              <h3 className="text-sm font-bold text-white">Connecting {connectingUser}</h3>
+              <p className="text-xs text-white/40 font-mono tracking-tight">{statusMessage}</p>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Footer Link */}
-        <button 
-          suppressHydrationWarning={true}
-          className="text-[10px] font-bold text-white/15 hover:text-white/30 transition-colors self-center tracking-wider"
-        >
-          Already connected? Manage orgs →
-        </button>
+        {/* Error Alert */}
+        {error && !connectingUser && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl p-4 flex gap-3 items-start animate-in fade-in duration-300">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold uppercase tracking-wider">Connection Error</span>
+              <p className="text-xs font-medium opacity-80">{error}</p>
+            </div>
+          </div>
+        )}
 
-        {/* Bottom Org Cards */}
-        <div className="flex items-center justify-center gap-2.5 pb-6">
-           <div className="flex flex-col gap-0.5 p-3 bg-[#0b1120] border border-white/5 rounded-lg min-w-[140px]">
-              <span className="text-[10px] font-bold text-white tracking-tight">Acme Corp - Prod</span>
-              <span className="text-[8px] text-white/30 font-semibold">Production • 248 objects</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#3fb950]" />
-                <span className="text-[8px] text-[#3fb950] font-bold">Active</span>
+        {/* Main Content Area */}
+        {!connectingUser && (
+          <div className="bg-[#0b1120] border border-white/5 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Card Title */}
+            <div className="bg-[#1e293b]/30 border-b border-white/5 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-[16px] font-bold text-white tracking-tight flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-[#00a1e0]" />
+                  Detected Local SFDX Orgs
+                </h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">
+                  Select an active local sandbox or developer hub
+                </p>
               </div>
-           </div>
+              <span className="bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
+                {orgs.length} Found
+              </span>
+            </div>
 
-           <div className="flex flex-col gap-0.5 p-3 bg-[#0b1120] border border-white/5 rounded-lg min-w-[140px]">
-              <span className="text-[10px] font-bold text-white tracking-tight">Acme Corp - Sandbox</span>
-              <span className="text-[8px] text-white/30 font-semibold">Sandbox • Full copy</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00a1e0]" />
-                <span className="text-[8px] text-[#00a1e0] font-bold">Connected</span>
+            {/* Content List */}
+            <div className="p-6 flex flex-col gap-4">
+              {loading ? (
+                <div className="flex flex-col items-center py-12 gap-3">
+                  <Loader2 className="w-8 h-8 text-[#00a1e0] animate-spin" />
+                  <span className="text-xs text-white/30 font-medium">Scanning local credentials...</span>
+                </div>
+              ) : orgs.length === 0 ? (
+                <div className="text-center py-8 flex flex-col items-center gap-3">
+                  <Server className="w-10 h-10 text-white/10" />
+                  <p className="text-xs text-white/40 max-w-xs font-medium">
+                    No local SFDX organizations found in your home directory `.sfdx`.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto no-scrollbar">
+                  {orgs.map((org) => {
+                    const hasAlias = org.aliases && org.aliases.length > 0;
+                    const primaryAlias = hasAlias ? org.aliases[0] : org.username.split('@')[0];
+                    const isSandbox = org.instanceUrl.includes('sandbox') || org.loginUrl.includes('test');
+
+                    return (
+                      <div 
+                        key={org.username}
+                        className="group flex items-center justify-between p-3.5 bg-black/20 border border-white/5 hover:border-white/10 rounded-xl transition-all"
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white group-hover:text-[#00a1e0] transition-colors">
+                              {primaryAlias}
+                            </span>
+                            <span className={cn(
+                              "text-[8px] font-bold uppercase px-1.5 py-0.25 rounded-full border",
+                              isSandbox
+                                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                            )}>
+                              {isSandbox ? 'Sandbox' : 'Production'}
+                            </span>
+                            {org.isDevHub && (
+                              <span className="bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-[8px] font-bold uppercase px-1.5 py-0.25 rounded-full">
+                                DevHub
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-white/30 font-mono tracking-tight truncate max-w-[320px]">
+                            {org.username}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => handleConnectSfdx(org.username)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-[#00a1e0] border border-white/10 hover:border-transparent text-[10px] font-bold rounded-lg transition-all"
+                        >
+                          Connect
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Standard OAuth Fallback */}
+              <div className="border-t border-white/5 pt-5 flex flex-col gap-3">
+                <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] self-center">
+                  OR USE TRADITIONAL AUTHENTICATION
+                </span>
+                <button
+                  onClick={handleFallbackOAuth}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-[12px] shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <Cloud className="w-4 h-4 text-[#00a1e0]" />
+                  Authenticate via Salesforce Web Browser
+                </button>
               </div>
-           </div>
+            </div>
+          </div>
+        )}
 
-           <button 
-             suppressHydrationWarning={true}
-             className="flex items-center justify-center gap-1.5 p-3 border border-dashed border-white/5 rounded-lg min-w-[100px] h-full text-white/15 hover:text-white/30 transition-all group"
-           >
-             <Plus className="w-3 h-3 group-hover:rotate-90 transition-transform" />
-             <span className="text-[9px] font-bold uppercase tracking-wider">Add org</span>
-           </button>
-        </div>
+        {/* Footer / Instructions */}
+        <p className="text-center text-[10px] text-white/20 font-medium tracking-wide">
+          Forge AI respects your privacy. Local keys are decrypted locally and encrypted with your secret key before being stored in the database.
+        </p>
+
       </div>
     </div>
   );
