@@ -1,0 +1,29 @@
+[
+  {
+    "id": "70ba7467-8667-431e-8c36-268353f0b251",
+    "aud": "authenticated",
+    "role": "authenticated",
+    "email": "mr.shafiulla143@gmail.com",
+    "email_confirmed_at": "2026-05-14T13:54:20.067679Z",
+    "phone": "",
+    "confirmation_sent_at": "2026-05-14T13:51:50.012158Z",
+    "confirmed_at": "2026-05-14T13:54:20.067679Z",
+    "last_sign_in_at": "2026-05-29T18:19:54.395744Z",
+    "app_metadata": {
+      "provider": "email",
+      "providers": [
+        "email"
+      ]
+    },
+    "user_metadata": {
+      "email": "mr.shafiulla143@gmail.com",
+      "email_verified": true,
+      "phone_verified": false,
+      "sub": "70ba7467-8667-431e-8c36-268353f0b251"
+    },
+    "identities": null,
+    "created_at": "2026-05-14T13:51:49.96982Z",
+    "updated_at": "2026-06-02T09:30:12.008462Z",
+    "is_anonymous": false
+  }
+]

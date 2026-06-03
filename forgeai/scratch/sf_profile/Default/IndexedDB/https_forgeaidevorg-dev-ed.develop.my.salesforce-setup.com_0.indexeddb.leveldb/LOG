@@ -1,0 +1,9 @@
+2026/06/02-17:47:52.871 63cc Reusing MANIFEST C:\Users\SHAFIULLA\forge-ai\scratch\sf_profile\Default\IndexedDB\https_forgeaidevorg-dev-ed.develop.my.salesforce-setup.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/06/02-17:47:52.873 63cc Recovering log #69
+2026/06/02-17:47:52.887 63cc Reusing old log C:\Users\SHAFIULLA\forge-ai\scratch\sf_profile\Default\IndexedDB\https_forgeaidevorg-dev-ed.develop.my.salesforce-setup.com_0.indexeddb.leveldb/000069.log 
+2026/06/02-17:48:24.681 a180 Level-0 table #75: started
+2026/06/02-17:48:24.767 a180 Level-0 table #75: 2377597 bytes OK
+2026/06/02-17:48:24.772 a180 Delete type=0 #69
+2026/06/02-17:48:27.846 63cc Compacting 1@1 + 2@2 files
+2026/06/02-17:48:28.056 63cc Generated table #76@1: 1126 keys, 3065315 bytes
+2026/06/02-17:48:28.101 63cc compacted to: files[ 0 1 2 0 0 0 0 ]

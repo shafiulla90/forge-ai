@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-06-02T09:40:22.816Z",
+  "tables": {
+    "orgs": {
+      "count": 3,
+      "file": "orgs.json"
+    },
+    "user_configs": {
+      "count": 1,
+      "file": "user_configs.json"
+    },
+    "jira_connections": {
+      "count": 1,
+      "file": "jira_connections.json"
+    },
+    "deployments": {
+      "count": 73,
+      "file": "deployments.json"
+    },
+    "deployment_steps": {
+      "count": 190,
+      "file": "deployment_steps.json"
+    },
+    "conversations": {
+      "count": 46,
+      "file": "conversations.json"
+    },
+    "messages": {
+      "count": 45,
+      "file": "messages.json"
+    }
+  },
+  "usersCount": 1,
+  "errors": {
+    "jira_approvals": "Could not find the table 'public.jira_approvals' in the schema cache",
+    "flow_sessions": "Could not find the table 'public.flow_sessions' in the schema cache",
+    "jira_tickets": "Could not find the table 'public.jira_tickets' in the schema cache"
+  }
+}

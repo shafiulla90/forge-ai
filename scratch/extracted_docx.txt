@@ -1,0 +1,820 @@
+FORGE
+AI SALESFORCE BUILDER
+Describe it.  Forge it.  Ship it.
+BACKEND IMPLEMENTATION PLAN
+Full API Architecture  ·  Database Schema  ·  Route Handlers  ·  AI Integration  ·  DevOps Pipeline
+Version
+1.0
+Date
+May 2026
+Stack
+Next.js 14 + Node.js 20
+Database
+Supabase (PostgreSQL 15)
+AI
+Claude Sonnet + Haiku
+Status
+CONFIDENTIAL
+§1 — Overview &amp; Architecture
+Forge AI Builder is a Next.js 14 application where the backend lives entirely within Next.js Route Handlers (App Router). There is no separate Express or NestJS server. All backend logic — Salesforce OAuth, AI chat, deployment, Jira, Git, and billing — runs as serverless functions co-located with the frontend on Vercel.
+1.1  Backend Architecture Principles
+Serverless-first — all API routes are Next.js Route Handlers deployed as Vercel Edge/Serverless Functions
+Org-isolated — every Supabase query is scoped to the authenticated user_id via Row-Level Security (RLS)
+Async deployment — Salesforce Metadata API calls are long-running (45–90s); handled with Supabase Realtime streaming
+Atomic action counter — Redis INCR prevents race conditions on subscription plan limits
+AI prompt caching — org metadata injected into every Claude call; prompt caching reduces API cost 35–45%
+1.2  Folder Structure — Backend Files
+Next.js App Router Backend Structure
+app/api/auth/salesforce/route.ts         — Salesforce OAuth callback handler
+app/api/orgs/route.ts                    — List / create connected orgs
+app/api/orgs/[id]/route.ts               — Get / delete a specific org
+app/api/orgs/[id]/refresh/route.ts       — Trigger metadata re-ingestion
+app/api/orgs/[id]/health/route.ts        — Run / fetch org health check
+app/api/chat/route.ts                    — AI chat streaming endpoint (SSE)
+app/api/deploy/route.ts                  — Approve and trigger deployment
+app/api/deploy/[id]/rollback/route.ts    — Rollback a deployment
+app/api/deploy/[id]/status/route.ts      — Poll deployment step status
+app/api/jira/connect/route.ts            — Jira OAuth callback
+app/api/jira/webhook/route.ts            — Receive Jira ticket webhooks
+app/api/jira/ticket/route.ts             — Create / update Jira ticket
+app/api/git/connect/route.ts             — GitHub OAuth callback
+app/api/git/commit/route.ts              — Commit SFDX metadata to branch
+app/api/git/pr/route.ts                  — Create Pull Request
+app/api/billing/stripe/route.ts          — Stripe webhook handler
+app/api/billing/portal/route.ts          — Stripe Customer Portal redirect
+lib/salesforce.ts                        — JSforce client factory + token refresh
+lib/ai.ts                                — Claude API helpers + prompt builder
+lib/supabase.ts                          — Supabase server client (RLS-aware)
+lib/redis.ts                             — Upstash Redis client + action counter
+lib/github.ts                            — Octokit client + branch/PR helpers
+lib/jira.ts                              — Atlassian API helpers
+lib/stripe.ts                            — Stripe SDK singleton
+middleware.ts                            — Auth guard + subscription check
+§2 — Authentication &amp; Middleware
+2.1  Supabase Auth (User Login)
+User authentication uses Supabase Auth (email/password + magic link). The session JWT is stored in an HTTP-only cookie by Supabase SSR helpers.
+File
+Method
+What It Does
+middleware.ts
+ALL routes
+Reads session cookie, validates JWT via Supabase Auth, redirects unauthenticated users to /login
+app/api/**/route.ts
+Server-side
+Creates Supabase server client using cookies() — RLS automatically scopes all queries to auth.uid()
+lib/supabase.ts
+Helper
+Exports createServerClient() wrapper with cookie integration for use in all Route Handlers
+2.2  Salesforce OAuth Flow
+Salesforce uses OAuth 2.0 Web Server Flow. The Connected App is registered in the Forge ISV Partner Org.
+Step
+Route / Action
+Detail
+1 — Initiate
+GET /api/auth/salesforce
+Redirect user to Salesforce /authorize endpoint with client_id, redirect_uri, scope=api+refresh_token+full
+2 — Callback
+GET /api/auth/salesforce/callback
+Receive code param → POST to Salesforce /token → get access_token + refresh_token
+3 — Store
+Supabase orgs table
+AES-256-GCM encrypt both tokens → store in orgs table with instance_url, org_id, user_id
+4 — Refresh
+lib/salesforce.ts
+JSforce auto-refresh: on 401 response, exchange refresh_token for new access_token → re-encrypt and update DB
+5 — Use
+Any API route
+createSalesforceClient(orgId) — reads from DB, decrypts token, returns configured JSforce connection
+Environment Variables Required
+SALESFORCE_CLIENT_ID              — Connected App Consumer Key
+SALESFORCE_CLIENT_SECRET          — Connected App Consumer Secret
+SALESFORCE_REDIRECT_URI           — https://forge.ai/api/auth/salesforce/callback
+TOKEN_ENCRYPTION_KEY              — 32-byte AES key (never in source code)
+NEXT_PUBLIC_SUPABASE_URL          — Supabase project URL
+SUPABASE_SERVICE_ROLE_KEY         — For server-side RLS bypass (admin ops only)
+ANTHROPIC_API_KEY                 — Claude Sonnet + Haiku
+OPENAI_API_KEY                    — text-embedding-3-small (pgvector)
+UPSTASH_REDIS_REST_URL            — Action counter + rate limiting
+UPSTASH_REDIS_REST_TOKEN          — Redis auth
+STRIPE_SECRET_KEY                 — Billing
+STRIPE_WEBHOOK_SECRET             — Webhook signature verification
+GITHUB_CLIENT_ID + SECRET         — GitHub OAuth App
+JIRA_CLIENT_ID + SECRET           — Atlassian OAuth 2.0 (3LO)
+§3 — Salesforce API Integration
+3.1  lib/salesforce.ts — JSforce Client
+Every Route Handler that touches Salesforce calls createSalesforceClient(orgId, userId). This function: fetches the encrypted org record from Supabase, decrypts both tokens, initialises a JSforce Connection, and registers an onRefresh callback to save the new token back to the database.
+3.2  Metadata Ingestion Pipeline
+Triggered on first org connect and on manual refresh. This is the most complex backend operation.
+Step
+API Used
+What Happens
+1 — List types
+JSforce metadata.describe()
+Returns all metadata type names available in this org
+2 — List members
+JSforce metadata.list()
+For each type, list all members (API names). Uses Bulk API 2.0 for orgs with 1000+ objects
+3 — Read Apex
+Tooling API query()
+SELECT Id, Name, Body FROM ApexClass — reads full source code for governor limit scanning
+4 — Read Flows
+REST API FlowDefinition
+GET /services/data/v59.0/query?q=SELECT+DeveloperName+FROM+FlowDefinition — all flow names
+5 — Embed
+OpenAI text-embedding-3-small
+Chunk each metadata item into text snippets → embed → store in Supabase pgvector with org_id namespace
+6 — Update DB
+Supabase orgs table
+Set metadata_synced_at, object_count, field_count, apex_class_count, flow_count
+3.3  API Routes — Org Management
+Route
+Method
+Purpose
+Key Logic
+GET /api/orgs
+GET
+List user&apos;s connected orgs
+SELECT from orgs WHERE user_id = auth.uid(). Returns alias, type, sync status, health score.
+POST /api/orgs
+POST
+Save org after OAuth
+Called by OAuth callback. Stores encrypted tokens. Triggers metadata ingestion as background job.
+GET /api/orgs/[id]
+GET
+Single org details
+Returns org metadata counts, sync status, connected pipelines.
+DELETE /api/orgs/[id]
+DELETE
+Disconnect org
+Deletes org record + all pgvector embeddings for that org_id namespace.
+PUT /api/orgs/[id]/refresh
+PUT
+Re-sync metadata
+Re-runs ingestion pipeline. Returns job_id for polling.
+GET /api/orgs/[id]/health
+GET
+Fetch health report
+Returns stored health JSON. If stale (&gt;24h), triggers fresh analysis.
+POST /api/orgs/[id]/health
+POST
+Run fresh health check
+Runs 7 SOQL + Tooling API queries → Claude Haiku analysis → stores result → returns structured JSON.
+§4 — AI Chat &amp; Implementation Engine
+4.1  POST /api/chat — Streaming Route Handler
+This is the core AI endpoint. It streams Claude Sonnet responses token-by-token to the frontend using Server-Sent Events (SSE).
+Step
+Code / Service
+Detail
+1 — Auth check
+middleware + Supabase
+Verify session. Load subscription tier. Check action counter via Redis.
+2 — Intent detect
+Claude Haiku (fast)
+POST to Anthropic API with short prompt: classify intent as metadata-read / build / question / health. ~200ms.
+3 — RAG retrieval
+Supabase pgvector
+Embed user message → cosine similarity search → retrieve top 10 most relevant org metadata chunks for this org.
+4 — Build prompt
+lib/ai.ts buildSystemPrompt()
+Inject: org alias, org type, retrieved objects/fields/Apex/Flows, governor limit rules, Forge instructions.
+5 — Stream
+Anthropic SDK stream()
+anthropic.messages.stream({ model: claude-sonnet-4-5, system, messages }) → pipe to ReadableStream.
+6 — Parse plan
+Server-side XML parser
+On stream end: extract &lt;plan&gt;[...] JSON from response text. Store in messages.implementation_plan.
+7 — Save
+Supabase messages table
+INSERT conversation message (role=assistant, content, implementation_plan, confidence_score).
+8 — Increment
+Redis INCR
+Atomic increment of action:{user_id}:{YYYY-MM} counter. Checked against tier limit on next request.
+4.2  Streaming Response Format (SSE)
+The frontend uses the native EventSource API (or a ReadableStream reader) to consume the stream:
+SSE Event Format from /api/chat
+data: {&quot;type&quot;:&quot;token&quot;, &quot;text&quot;:&quot;Based on your&quot;}
+data: {&quot;type&quot;:&quot;token&quot;, &quot;text&quot;:&quot; Acme Corp org...&quot;}
+data: {&quot;type&quot;:&quot;plan&quot;, &quot;steps&quot;:[{&quot;step&quot;:1,&quot;type&quot;:&quot;CustomField&quot;,...}]}
+data: {&quot;type&quot;:&quot;done&quot;, &quot;messageId&quot;:&quot;uuid&quot;, &quot;conversationId&quot;:&quot;uuid&quot;}
+data: {&quot;type&quot;:&quot;error&quot;, &quot;message&quot;:&quot;Rate limit exceeded&quot;}
+4.3  Org Health Check Route — POST /api/orgs/[id]/health
+Runs 7 independent queries against the org, feeds results to Claude Haiku, returns structured JSON matching the SDD §5.3 schema.
+Query
+API
+Detects
+SOQL: unused custom fields (lastReferenced &lt; 12mo)
+REST API
+Metadata bloat — unused fields
+Tooling API: ApexClass source scan for SOQL/DML in loops
+Tooling API
+Governor limit risks
+Tooling API: ApexCodeCoverage aggregate
+Tooling API
+Apex test coverage below 75%
+REST API: FlowDefinition WHERE Status != Active
+REST API
+Inactive / orphaned Flows
+REST API: Profile WHERE PermissionsModifyAllData = true
+REST API
+Profiles with excessive permissions
+REST API: Flow best practice check (fault paths, null checks)
+REST API
+Flow quality score
+Metadata API: retrieve all Profiles for security scan
+Metadata API
+Security misconfigurations
+§5 — Deployment Engine
+5.1  POST /api/deploy — Approve &amp; Deploy
+This is the most critical Route Handler. It is only reachable after the human approval step in the UI. The middleware verifies the approval record exists with a human timestamp before any JSforce call is made.
+Step
+Service
+Detail
+1 — Verify approval
+Supabase deployment_approvals
+Check approved_by IS NOT NULL and approved_at is within 30 minutes. Block if missing.
+2 — Create deployment record
+Supabase deployments
+INSERT with status=deploying, git_branch, jira_ticket_id. Returns deployment_id.
+3 — For each plan step
+JSforce + Supabase Realtime
+Execute step → write result to deployment_steps table → Supabase Realtime broadcasts to frontend.
+4 — Apex steps
+Tooling API ContainerAsyncRequest
+Compile Apex → check CompilationResult → run tests → check coverage &gt;= 75%. Auto-rollback if tests fail.
+5 — Metadata steps
+JSforce metadata.deploy()
+Package XML → deploy() → poll DeployResult every 3 seconds → write status updates to Realtime.
+6 — All steps done
+lib/ai.ts selfEvaluate()
+Claude verifies each acceptance criterion via follow-up Salesforce API queries. Returns 0-100 confidence score.
+7 — Store evaluation
+Supabase deployments
+UPDATE deployments SET acceptance_criteria_results, confidence_score, status=success.
+8 — Rollback metadata
+JSforce metadata.retrieve()
+Retrieve pre-deployment state of changed items → store as JSONB in deployments.rollback_metadata. Available 24h.
+5.2  Supabase Realtime — Live Deployment Log
+The frontend subscribes to a Supabase Realtime channel on the deployment_steps table, filtered by deployment_id. Each step completion is a DB INSERT that Realtime broadcasts in real time.
+Frontend Subscription Pattern
+const channel = supabase.channel(&apos;deployment:&apos; + deploymentId)
+  .on(&apos;postgres_changes&apos;, { event: &apos;INSERT&apos;, schema: &apos;public&apos;, table: &apos;deployment_steps&apos;,
+       filter: &apos;deployment_id=eq.&apos; + deploymentId }, (payload) =&gt; {
+    updateDeploymentLog(payload.new);  // renders step card in UI
+  }).subscribe();
+5.3  DELETE /api/deploy/[id]/rollback — Rollback
+Step
+Action
+1 — Check window
+Verify deployed_at + 24h &gt; NOW(). Return 403 if expired.
+2 — Load snapshot
+Read deployments.rollback_metadata JSONB — the pre-deployment org state.
+3 — Re-deploy old state
+JSforce metadata.deploy() with the pre-deployment package XML.
+4 — Update record
+UPDATE deployments SET status=rolled_back, rolled_back_at=NOW().
+5 — Audit log
+INSERT into audit_log: action=rollback, metadata includes original + rollback deployment IDs.
+6 — Notify
+Resend email to user: rollback complete. Jira comment added if ticket linked.
+§6 — Jira &amp; Git Integration
+6.1  Jira API Routes
+Route
+Method
+Purpose
+GET /api/jira/connect
+GET
+Initiate Atlassian OAuth 2.0 (3LO) flow — redirect to Atlassian /authorize
+GET /api/jira/callback
+GET
+Receive code → exchange for tokens → encrypt → store in jira_connections table
+POST /api/jira/ticket
+POST
+Create Jira issue via REST API POST /rest/api/3/issue — called after plan approval
+PUT /api/jira/ticket/[id]/status
+PUT
+Transition ticket status via POST /rest/api/3/issue/{id}/transitions
+POST /api/jira/webhook
+POST
+Receive Jira webhook (ticket approved) → validate JWT → trigger deployment pipeline
+GET /api/jira/board
+GET
+Read active sprint issues from Jira board — filtered by forge-ai label for board view screen
+6.2  Jira Webhook Handler — POST /api/jira/webhook
+When a Jira ticket transitions to an approved state, Atlassian sends a signed webhook to Forge. This triggers the full build pipeline automatically.
+Step
+Detail
+1 — Verify JWT
+Validate Atlassian webhook JWT signature using JIRA_CLIENT_SECRET. Return 401 if invalid.
+2 — Check transition
+Only proceed if webhook.issue.fields.status.name matches configured trigger (e.g. &apos;Approved for Dev&apos;).
+3 — Load Jira connection
+Find jira_connections record for this Atlassian site URL. Check auto_deploy_trigger setting.
+4 — Extract ticket data
+Parse description, acceptance criteria, target org, metadata change spec from Jira issue body.
+5 — Trigger build
+POST to internal /api/chat with extracted spec + orgId. Get implementation plan back.
+6 — Auto-deploy if configured
+If auto_deploy_trigger = sandbox: call /api/deploy with auto-approval for sandbox org only.
+7 — Update Jira
+POST comment to Jira ticket: &apos;Forge AI is building this. View progress: [forge.ai/deploy/...]&apos;
+6.3  Git API Routes
+Route
+Method
+Octokit Call
+Purpose
+GET /api/git/connect
+GET
+GitHub OAuth redirect
+Initiate GitHub OAuth App flow
+GET /api/git/callback
+GET
+Exchange code for token
+Store GitHub access token in git_connections
+POST /api/git/branch
+POST
+octokit.git.createRef()
+Create feature/SFDC-{id}-{slug} branch off main
+POST /api/git/commit
+POST
+octokit.repos.createOrUpdateFileContents()
+Commit each SFDX metadata file to branch
+POST /api/git/pr
+POST
+octokit.pulls.create()
+Create PR with AI evaluation report as body
+GET /api/git/diff/[prId]
+GET
+octokit.pulls.listFiles()
+Get files changed in PR for diff view
+POST /api/git/merge/[prId]
+POST
+octokit.repos.merge()
+Merge PR to main on Production approval
+§7 — Billing &amp; Subscription (Stripe)
+7.1  Subscription Tiers
+Tier
+Price
+Orgs
+Actions/month
+Features
+Free
+₹0
+1 (read-only)
+10 (no deploy)
+Org health, metadata explorer, AI chat (plans only)
+Starter
+₹4,999/mo
+1
+100
+Full AI implementation, deployment, rollback, history
+Professional
+₹14,999/mo
+3
+Unlimited
+All Starter + Jira, Git sync, multi-org pipeline, 5 seats
+SI Partner
+₹50K–5L/mo
+Unlimited
+Unlimited
+White-label, dedicated support, SLA, custom training
+7.2  Stripe Route Handlers
+Route
+Method
+Purpose
+POST /api/billing/checkout
+POST
+Create Stripe Checkout Session for plan upgrade. Redirect user to Stripe-hosted checkout page.
+GET /api/billing/portal
+GET
+Create Stripe Customer Portal session. User manages plan, payment method, invoices.
+POST /api/billing/stripe
+POST
+Stripe webhook handler — handles subscription updates, payment failures, invoice payment success.
+7.3  Webhook Events Handled
+Stripe Event
+Action in Forge Backend
+checkout.session.completed
+Update users.subscription_tier. Reset action_count. Send welcome email via Resend.
+customer.subscription.updated
+Sync new plan tier to users table. Update feature flags in Redis.
+invoice.payment_failed
+Start 7-day grace period. Send payment failure email. Do not downgrade immediately.
+invoice.payment_succeeded
+Confirm subscription active. Reset monthly action counter in Redis for new billing period.
+customer.subscription.deleted
+Downgrade user to Free tier. Revoke deploy access. Keep org connections in read-only mode.
+7.4  License Enforcement Middleware
+Every API request that consumes an AI action passes through this middleware chain in order:
+Check
+How
+On Fail
+1. Auth
+Supabase getUser() from cookie
+401 Unauthorized → redirect to /login
+2. Subscription
+SELECT subscription_tier FROM users WHERE id = auth.uid()
+403 Forbidden with upgrade prompt
+3. Org count
+COUNT orgs WHERE user_id → compare to tier limit
+403 Forbidden: &apos;Upgrade to connect more orgs&apos;
+4. Action counter
+Redis GET action:{userId}:{month} → compare to tier limit
+402 Payment Required: &apos;Action limit reached&apos;
+5. Feature flag
+subscription_tier includes requested feature?
+403 Forbidden: feature name + upgrade tier required
+6. Rate limit
+Redis sliding window: 10 req/minute per user
+429 Too Many Requests: retry-after header set
+§8 — Database Schema (Supabase PostgreSQL)
+8.1  Core Tables
+Table
+Primary Key
+Key Columns
+Purpose
+users
+UUID (Supabase Auth)
+email, subscription_tier, action_count, stripe_customer_id
+One row per signed-up user. Managed by Supabase Auth + custom columns.
+orgs
+UUID
+user_id, org_alias, instance_url, access_token (encrypted), refresh_token (encrypted), org_type
+Connected Salesforce orgs. Multiple per user.
+conversations
+UUID
+org_id, user_id, jira_ticket_id, title
+AI chat sessions. One conversation per feature request or Jira ticket.
+messages
+UUID
+conversation_id, role, content, implementation_plan (JSONB), confidence_score
+Individual chat messages. JSONB plan column stores structured deploy steps.
+deployments
+UUID
+conversation_id, org_id, status, git_branch, rollback_metadata (JSONB), acceptance_criteria_results (JSONB)
+One row per deployment attempt. Includes rollback snapshot.
+deployment_steps
+UUID
+deployment_id, step_number, status, api_used, duration_ms, error_message
+Supabase Realtime source table. One row per deploy step — streamed live.
+jira_connections
+UUID
+user_id, site_url, project_key, access_token (encrypted), auto_deploy_trigger
+Connected Jira workspaces. One per user per Atlassian site.
+git_connections
+UUID
+user_id, provider, repo_full_name, default_branch, access_token (encrypted)
+Connected GitHub/GitLab repos. One per user per repo.
+audit_log
+UUID
+user_id, org_id, action, metadata (JSONB), ip_address
+Immutable record of all actions. Never deleted. Used for compliance.
+8.2  Row-Level Security Policies
+All tables have RLS enabled. No cross-tenant data leakage is possible at the database level, regardless of application code bugs.
+Table
+Policy
+SQL
+orgs
+Users see only their orgs
+USING (user_id = auth.uid())
+conversations
+Users see only their conversations
+USING (user_id = auth.uid())
+messages
+Via conversation ownership
+USING (EXISTS (SELECT 1 FROM conversations c WHERE c.id = conversation_id AND c.user_id = auth.uid()))
+deployments
+Users see only their deployments
+USING (user_id = auth.uid())
+deployment_steps
+Via deployment ownership
+USING (EXISTS (SELECT 1 FROM deployments d WHERE d.id = deployment_id AND d.user_id = auth.uid()))
+audit_log
+Users see only their log
+USING (user_id = auth.uid())
+8.3  pgvector — Org Metadata Vector Store
+Each connected org gets its own namespace in pgvector. Embeddings are generated by OpenAI text-embedding-3-small and stored in a metadata_embeddings table.
+Column
+Type
+Purpose
+id
+UUID
+Primary key
+org_id
+UUID (FK orgs)
+Namespace isolation — always filter by org_id
+metadata_type
+TEXT
+CustomField / ApexClass / Flow / Layout etc.
+api_name
+TEXT
+The Salesforce API name (e.g. Account.Partner_Tier__c)
+content_text
+TEXT
+Human-readable description used for embedding
+embedding
+vector(1536)
+OpenAI embedding — cosine similarity search
+raw_metadata
+JSONB
+Full metadata JSON for injection into Claude prompt
+§9 — Backend Sprint Implementation Plan
+Sprint 1–3: Foundation (Weeks 1–3)
+Task
+File/Area
+Priority
+Supabase project setup — create all tables with RLS
+Supabase Dashboard + migrations/
+P0
+Next.js project init with App Router + TypeScript
+package.json, tsconfig.json
+P0
+Supabase Auth integration (email + magic link)
+app/login, middleware.ts
+P0
+Salesforce Connected App registration
+partners.salesforce.com
+P0
+OAuth 2.0 flow — /api/auth/salesforce
+app/api/auth/salesforce/route.ts
+P0
+AES-256-GCM token encryption/decryption helpers
+lib/crypto.ts
+P0
+JSforce client factory with auto-refresh
+lib/salesforce.ts
+P0
+Basic org listing — GET /api/orgs
+app/api/orgs/route.ts
+P1
+Vercel CI/CD setup + GitHub Actions
+.github/workflows/
+P1
+Upstash Redis client + action counter
+lib/redis.ts
+P1
+Sprint 4–6: AI Core (Weeks 4–6)
+Task
+File/Area
+Priority
+OpenAI embedding integration
+lib/embeddings.ts
+P0
+pgvector table + cosine similarity search helper
+lib/vector.ts
+P0
+Full metadata ingestion pipeline
+lib/ingestion.ts
+P0
+Claude Sonnet streaming chat endpoint
+app/api/chat/route.ts
+P0
+System prompt builder with org context injection
+lib/ai.ts buildSystemPrompt()
+P0
+Claude Haiku intent detection (fast path)
+lib/ai.ts detectIntent()
+P1
+Plan JSON extraction from Claude response
+lib/ai.ts parsePlan()
+P0
+Org health check — 7 queries + Claude Haiku analysis
+app/api/orgs/[id]/health/route.ts
+P1
+Subscription tier middleware
+middleware.ts
+P1
+Sprint 7–9: Deployment Engine (Weeks 7–9)
+Task
+File/Area
+Priority
+POST /api/deploy — main deployment route handler
+app/api/deploy/route.ts
+P0
+JSforce Metadata API deploy() integration
+lib/deploy.ts deployMetadata()
+P0
+Tooling API Apex deploy + test runner
+lib/deploy.ts deployApex()
+P0
+Supabase Realtime — deployment_steps live stream
+lib/realtime.ts
+P0
+AI self-evaluation after deployment
+lib/ai.ts selfEvaluate()
+P0
+Rollback mechanism + 24-hour window
+app/api/deploy/[id]/rollback/route.ts
+P0
+Auto-rollback on test coverage failure
+lib/deploy.ts
+P0
+Audit log writes on every action
+lib/audit.ts
+P1
+Resend email notifications (deploy success/fail)
+lib/email.ts
+P2
+Sprint 10–12: Jira + Git (Weeks 10–12)
+Task
+File/Area
+Priority
+Jira OAuth 2.0 (3LO) flow
+app/api/jira/connect/route.ts
+P0
+Jira ticket create + status update
+app/api/jira/ticket/route.ts
+P0
+Jira webhook receiver with JWT validation
+app/api/jira/webhook/route.ts
+P0
+GitHub OAuth App connection
+app/api/git/connect/route.ts
+P0
+Auto-create Git branch per ticket
+app/api/git/branch/route.ts
+P0
+Commit SFDX metadata to branch
+app/api/git/commit/route.ts
+P0
+Auto-create Pull Request with AI eval report
+app/api/git/pr/route.ts
+P0
+PR diff view — fetch changed files
+app/api/git/diff/[prId]/route.ts
+P1
+PR merge on Production approval
+app/api/git/merge/[prId]/route.ts
+P1
+Sprint 13–14: Billing + Pipeline (Weeks 13–14)
+Task
+File/Area
+Priority
+Stripe Checkout + Customer Portal routes
+app/api/billing/
+P0
+Stripe webhook handler (all 5 events)
+app/api/billing/stripe/route.ts
+P0
+Full license enforcement middleware
+middleware.ts
+P0
+Multi-org pipeline config + promotion flow
+app/api/pipeline/route.ts
+P1
+Production deployment extra approval gate
+middleware.ts + app/api/deploy/
+P0
+After-hours deployment block (configurable)
+middleware.ts
+P2
+Rate limiting (10 req/min per user)
+middleware.ts + lib/redis.ts
+P1
+§10 — Security Checklist
+Control
+Implementation
+Status
+AES-256-GCM token encryption
+All Salesforce, Jira, GitHub tokens encrypted before DB write
+Required — Week 1
+Row-Level Security
+RLS on all Supabase tables — user_id = auth.uid()
+Required — Week 1
+Production deployment approval
+Hard-coded in middleware — cannot be bypassed via API
+Required — Week 7
+Human approval timestamp check
+Approval must be &lt; 30 minutes old before deploy fires
+Required — Week 7
+Stripe webhook signature
+stripe.webhooks.constructEvent() validates every webhook
+Required — Week 13
+Jira webhook JWT validation
+Validate Atlassian JWT on every webhook — 401 if invalid
+Required — Week 10
+Redis atomic action counter
+INCR is atomic — prevents race condition on plan limits
+Required — Week 3
+API keys in env vars only
+ANTHROPIC_API_KEY, OPENAI_API_KEY never in source or DB
+Required — Week 1
+Auto-rollback on test failure
+Coverage &lt; 75% → automatic rollback before user sees success
+Required — Week 8
+CORS — same-origin only
+Next.js default CORS policy. No public API access.
+Required — Week 1
+§11 — Quick Reference: All API Routes
+Route
+Method
+Auth?
+Description
+/api/auth/salesforce
+GET
+No
+Initiate Salesforce OAuth — redirect to SF authorize
+/api/auth/salesforce/callback
+GET
+No
+OAuth callback — exchange code for tokens
+/api/orgs
+GET
+Yes
+List user&apos;s connected Salesforce orgs
+/api/orgs
+POST
+Yes
+Save org after OAuth (called by callback)
+/api/orgs/[id]
+GET/DELETE
+Yes
+Get org details / disconnect org
+/api/orgs/[id]/refresh
+PUT
+Yes
+Trigger metadata re-ingestion
+/api/orgs/[id]/health
+GET/POST
+Yes
+Fetch / run fresh org health check
+/api/chat
+POST
+Yes
+AI chat streaming (SSE) — core AI endpoint
+/api/deploy
+POST
+Yes
+Approve + trigger Salesforce deployment
+/api/deploy/[id]/rollback
+DELETE
+Yes
+Rollback deployment (24h window)
+/api/deploy/[id]/status
+GET
+Yes
+Poll deployment status (fallback if Realtime fails)
+/api/jira/connect
+GET
+Yes
+Initiate Jira OAuth 2.0 (3LO)
+/api/jira/callback
+GET
+Yes
+Jira OAuth callback
+/api/jira/ticket
+POST
+Yes
+Create Jira issue
+/api/jira/ticket/[id]/status
+PUT
+Yes
+Transition Jira ticket status
+/api/jira/webhook
+POST
+No*
+Receive Jira webhook (* JWT-validated)
+/api/jira/board
+GET
+Yes
+Read active sprint from Jira board
+/api/git/connect
+GET
+Yes
+Initiate GitHub OAuth
+/api/git/callback
+GET
+Yes
+GitHub OAuth callback
+/api/git/branch
+POST
+Yes
+Create feature branch
+/api/git/commit
+POST
+Yes
+Commit SFDX metadata to branch
+/api/git/pr
+POST
+Yes
+Create Pull Request
+/api/git/diff/[prId]
+GET
+Yes
+Get PR changed files
+/api/git/merge/[prId]
+POST
+Yes
+Merge PR to main
+/api/billing/checkout
+POST
+Yes
+Create Stripe Checkout Session
+/api/billing/portal
+GET
+Yes
+Stripe Customer Portal redirect
+/api/billing/stripe
+POST
+No*
+Stripe webhook (* signature-validated)
+Forge AI Builder  ·  Backend Implementation Plan v1.0  ·  CONFIDENTIAL

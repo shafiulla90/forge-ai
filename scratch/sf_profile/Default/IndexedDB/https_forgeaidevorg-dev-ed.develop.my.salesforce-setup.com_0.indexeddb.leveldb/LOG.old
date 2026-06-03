@@ -1,0 +1,36 @@
+2026/06/02-17:43:46.535 8df8 Reusing MANIFEST C:\Users\SHAFIULLA\forge-ai\scratch\sf_profile\Default\IndexedDB\https_forgeaidevorg-dev-ed.develop.my.salesforce-setup.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/06/02-17:43:46.537 8df8 Recovering log #56
+2026/06/02-17:43:46.548 8df8 Reusing old log C:\Users\SHAFIULLA\forge-ai\scratch\sf_profile\Default\IndexedDB\https_forgeaidevorg-dev-ed.develop.my.salesforce-setup.com_0.indexeddb.leveldb/000056.log 
+2026/06/02-17:44:15.132 8df8 Level-0 table #62: started
+2026/06/02-17:44:15.162 8df8 Level-0 table #62: 2518606 bytes OK
+2026/06/02-17:44:15.165 8df8 Delete type=0 #56
+2026/06/02-17:44:19.638 8df8 Compacting 1@1 + 2@2 files
+2026/06/02-17:44:19.819 8df8 Generated table #63@1: 1127 keys, 3120876 bytes
+2026/06/02-17:44:19.904 8df8 Generated table #64@1: 2762 keys, 1354899 bytes
+2026/06/02-17:44:19.904 8df8 Compacted 1@1 + 2@2 files => 4475775 bytes
+2026/06/02-17:44:19.909 8df8 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/06/02-17:44:19.911 8df8 Delete type=2 #58
+2026/06/02-17:44:19.912 8df8 Delete type=2 #59
+2026/06/02-17:44:19.912 8df8 Delete type=2 #62
+2026/06/02-17:44:24.457 8df8 Level-0 table #66: started
+2026/06/02-17:44:24.527 8df8 Level-0 table #66: 2281832 bytes OK
+2026/06/02-17:44:24.531 8df8 Delete type=0 #61
+2026/06/02-17:44:27.227 8df8 Compacting 1@1 + 2@2 files
+2026/06/02-17:44:27.384 8df8 Generated table #67@1: 1089 keys, 3069877 bytes
+2026/06/02-17:44:27.479 8df8 Generated table #68@1: 2918 keys, 1824669 bytes
+2026/06/02-17:44:27.479 8df8 Compacted 1@1 + 2@2 files => 4894546 bytes
+2026/06/02-17:44:27.483 8df8 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/06/02-17:44:59.722 8df8 Level-0 table #70: started
+2026/06/02-17:44:59.754 8df8 Level-0 table #70: 1719184 bytes OK
+2026/06/02-17:44:59.759 8df8 Delete type=2 #63
+2026/06/02-17:44:59.760 8df8 Delete type=2 #64
+2026/06/02-17:44:59.760 8df8 Delete type=0 #65
+2026/06/02-17:44:59.760 8df8 Delete type=2 #66
+2026/06/02-17:45:31.741 8df8 Compacting 1@1 + 2@2 files
+2026/06/02-17:45:31.878 8df8 Generated table #71@1: 1134 keys, 3127200 bytes
+2026/06/02-17:45:31.931 8df8 Generated table #72@1: 2973 keys, 2095470 bytes
+2026/06/02-17:45:31.931 8df8 Compacted 1@1 + 2@2 files => 5222670 bytes
+2026/06/02-17:45:31.932 8df8 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/06/02-17:45:31.933 8df8 Delete type=2 #67
+2026/06/02-17:45:31.934 8df8 Delete type=2 #68
+2026/06/02-17:45:31.934 8df8 Delete type=2 #70

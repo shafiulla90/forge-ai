@@ -1,0 +1,1910 @@
+[
+  {
+    "id": "d3320a40-7181-48b9-93a5-9497463ca3ca",
+    "conversation_id": "5d8b1e56-af71-4578-a8c5-c310be3eb497",
+    "role": "assistant",
+    "content": "test",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-14T18:56:36.139884+00:00"
+  },
+  {
+    "id": "0b388474-e77a-46bd-93ca-7cb0ba1d1814",
+    "conversation_id": "273eca8b-2188-4d14-980e-e69e906b6581",
+    "role": "assistant",
+    "content": "test",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Equipment__c"
+        }
+      ]
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T19:09:19.348625+00:00"
+  },
+  {
+    "id": "f46cb58a-58fa-44d5-9605-ad9ffd838de9",
+    "conversation_id": "f18e0f9b-85fd-4719-aa16-46238d6e892f",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:05:50.435369+00:00"
+  },
+  {
+    "id": "24f1e277-b51f-4476-af92-9f5893725434",
+    "conversation_id": "d7437971-5231-4131-bdcc-d3e1a3fbadc6",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Forge_Test__c",
+          "metadata": {
+            "label": "Forge Test",
+            "nameField": {
+              "type": "Text",
+              "label": "Forge Test Name"
+            },
+            "allowSearch": true,
+            "description": "Custom object created by Forge AI for Forge Test records.",
+            "enableFeeds": false,
+            "pluralLabel": "Forge Tests",
+            "allowReports": true,
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Forge_Test__c.Status__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Status",
+            "length": 100,
+            "unique": false,
+            "required": false,
+            "description": "Text field to store the status of a Forge Test record.",
+            "caseSensitive": false
+          }
+        }
+      ],
+      "summary": "Create a new Custom Object 'Forge_Test__c' with a single Text field 'Status__c' (length 100)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:07:58.373063+00:00"
+  },
+  {
+    "id": "1cb4f514-fa4f-4f4c-900b-dfb058f8f637",
+    "conversation_id": "44762c3c-0a84-4e6d-8c15-a1ed2683bccb",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Forge_Test__c",
+          "metadata": {
+            "label": "Forge Test",
+            "pluralLabel": "Forge Tests",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Forge_Test__c.Status__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Status",
+            "length": 100
+          }
+        }
+      ],
+      "summary": "Create a new Custom Object 'Forge_Test__c' with a single Text field 'Status__c' (length 100)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:12:07.714327+00:00"
+  },
+  {
+    "id": "dd23846b-3c97-443c-b458-618003b9fcca",
+    "conversation_id": "44762c3c-0a84-4e6d-8c15-a1ed2683bccb",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Forge_Test__c",
+          "metadata": {
+            "label": "Forge Test",
+            "pluralLabel": "Forge Tests",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Forge_Test__c.Status__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Status",
+            "length": 100
+          }
+        }
+      ],
+      "summary": "Create a new Custom Object 'Forge_Test__c' with a single Text field 'Status__c' (length 100)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:16:01.337301+00:00"
+  },
+  {
+    "id": "c276d411-854c-44d2-8689-372db8f88d40",
+    "conversation_id": "14983944-edac-46da-8664-b876668da4ac",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Forge_Test__c",
+          "metadata": {
+            "label": "Forge Test",
+            "nameField": {
+              "type": "Text",
+              "label": "Name"
+            },
+            "pluralLabel": "Forge Tests",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Forge_Test__c.Status__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Status",
+            "length": 100
+          }
+        }
+      ],
+      "summary": "Create a new Custom Object 'Forge_Test__c' with a single Text field 'Status__c' (length 100)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:17:56.587039+00:00"
+  },
+  {
+    "id": "f1bbe1d0-d687-43e4-aa41-972b46e58c96",
+    "conversation_id": "02a24551-efbd-45e7-bb64-810d606e8fba",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "EmployeeEquipment__c",
+          "metadata": {
+            "label": "Employee Equipment",
+            "nameField": {
+              "type": "Text",
+              "label": "Equipment Name"
+            },
+            "pluralLabel": "Employee Equipment",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "EmployeeEquipment__c.SerialNumber__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Serial Number",
+            "length": 100,
+            "unique": true,
+            "required": true,
+            "externalId": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "EmployeeEquipment__c.AssignedUser__c",
+          "metadata": {
+            "type": "Lookup",
+            "label": "Assigned User",
+            "required": false,
+            "referenceTo": "User",
+            "relationshipName": "AssignedEquipment"
+          }
+        }
+      ],
+      "summary": "Create the Employee Equipment custom object with Serial Number and Assigned User fields"
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:19:39.064133+00:00"
+  },
+  {
+    "id": "cd6d8b21-ba76-4ed6-88b3-99f5c7f72cc6",
+    "conversation_id": "7e8032f4-6859-4c62-885e-946add0e4592",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Equipment__c",
+          "metadata": {
+            "label": "Employee Equipment",
+            "nameField": {
+              "type": "Text",
+              "label": "Equipment Name"
+            },
+            "pluralLabel": "Employee Equipment",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Equipment__c.Serial_Number__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Serial Number",
+            "length": 50
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Equipment__c.Assigned_User__c",
+          "metadata": {
+            "type": "Lookup",
+            "label": "Assigned User",
+            "referenceTo": "User",
+            "relationshipName": "Assigned_Equipment",
+            "relationshipLabel": "Employee Equipment"
+          }
+        }
+      ],
+      "summary": "Create a new Employee_Equipment__c custom object with Serial Number (Text) and Assigned User (Lookup to User) fields."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-14T20:22:33.10281+00:00"
+  },
+  {
+    "id": "69c8a68b-718c-4b7a-82db-1cd97032db0f",
+    "conversation_id": "7e8032f4-6859-4c62-885e-946add0e4592",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Customer_Feedback__c",
+          "metadata": {
+            "label": "Customer Feedback",
+            "nameField": {
+              "type": "AutoNumber",
+              "label": "Feedback Number",
+              "displayFormat": "FB-{0000}",
+              "startingNumber": 1
+            },
+            "pluralLabel": "Customer Feedbacks",
+            "sharingModel": "ReadWrite",
+            "enableHistory": true,
+            "enableReports": true,
+            "deploymentStatus": "Deployed",
+            "enableActivities": true
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Customer_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Customer Name",
+            "length": 100,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Customer_Email__c",
+          "metadata": {
+            "type": "Email",
+            "label": "Customer Email",
+            "unique": false,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Feedback_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Feedback Date",
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Rating__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Rating",
+            "required": false,
+            "valueSet": {
+              "restricted": false,
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "1 Star",
+                    "default": false,
+                    "fullName": "1 Star"
+                  },
+                  {
+                    "label": "2 Stars",
+                    "default": false,
+                    "fullName": "2 Stars"
+                  },
+                  {
+                    "label": "3 Stars",
+                    "default": false,
+                    "fullName": "3 Stars"
+                  },
+                  {
+                    "label": "4 Stars",
+                    "default": false,
+                    "fullName": "4 Stars"
+                  },
+                  {
+                    "label": "5 Stars",
+                    "default": false,
+                    "fullName": "5 Stars"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Feedback_Description__c",
+          "metadata": {
+            "type": "LongTextArea",
+            "label": "Feedback Description",
+            "length": 5000,
+            "required": false,
+            "visibleLines": 5
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Product_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Product Name",
+            "length": 150,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Resolved__c",
+          "metadata": {
+            "type": "Checkbox",
+            "label": "Resolved",
+            "defaultValue": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Resolution_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Resolution Date",
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Support_Agent__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Support Agent",
+            "length": 100,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Priority__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Priority",
+            "required": false,
+            "valueSet": {
+              "restricted": false,
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "Low",
+                    "default": false,
+                    "fullName": "Low"
+                  },
+                  {
+                    "label": "Medium",
+                    "default": false,
+                    "fullName": "Medium"
+                  },
+                  {
+                    "label": "High",
+                    "default": false,
+                    "fullName": "High"
+                  },
+                  {
+                    "label": "Critical",
+                    "default": false,
+                    "fullName": "Critical"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        }
+      ],
+      "summary": "Create the Customer Feedback custom object with Auto Number record name, enable Reports, Activities, and Field History Tracking, and create 10 custom fields covering text, email, date, picklist, long text area, and checkbox types."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-15T09:57:27.629044+00:00"
+  },
+  {
+    "id": "2eea68cc-2a68-439c-bef0-1324a15ec139",
+    "conversation_id": "12fc4ce8-de56-4ed9-bbd5-450d5bf11b95",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Customer_Feedback__c",
+          "metadata": {
+            "label": "Customer Feedback",
+            "nameField": {
+              "type": "AutoNumber",
+              "label": "Feedback Number",
+              "displayFormat": "FB-{0000}",
+              "startingNumber": 1
+            },
+            "pluralLabel": "Customer Feedbacks",
+            "sharingModel": "ReadWrite",
+            "enableHistory": true,
+            "enableReports": true,
+            "deploymentStatus": "Deployed",
+            "enableActivities": true
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Customer_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Customer Name",
+            "length": 100,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Customer_Email__c",
+          "metadata": {
+            "type": "Email",
+            "label": "Customer Email",
+            "unique": false,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Feedback_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Feedback Date",
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Rating__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Rating",
+            "required": false,
+            "valueSet": {
+              "restricted": false,
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "1 Star",
+                    "default": false,
+                    "fullName": "1 Star"
+                  },
+                  {
+                    "label": "2 Stars",
+                    "default": false,
+                    "fullName": "2 Stars"
+                  },
+                  {
+                    "label": "3 Stars",
+                    "default": false,
+                    "fullName": "3 Stars"
+                  },
+                  {
+                    "label": "4 Stars",
+                    "default": false,
+                    "fullName": "4 Stars"
+                  },
+                  {
+                    "label": "5 Stars",
+                    "default": false,
+                    "fullName": "5 Stars"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Feedback_Description__c",
+          "metadata": {
+            "type": "LongTextArea",
+            "label": "Feedback Description",
+            "length": 5000,
+            "required": false,
+            "visibleLines": 5
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Product_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Product Name",
+            "length": 150,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Resolved__c",
+          "metadata": {
+            "type": "Checkbox",
+            "label": "Resolved",
+            "defaultValue": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Resolution_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Resolution Date",
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Support_Agent__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Support Agent",
+            "length": 100,
+            "required": false
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Customer_Feedback__c.Priority__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Priority",
+            "required": false,
+            "valueSet": {
+              "restricted": false,
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "Low",
+                    "default": false,
+                    "fullName": "Low"
+                  },
+                  {
+                    "label": "Medium",
+                    "default": false,
+                    "fullName": "Medium"
+                  },
+                  {
+                    "label": "High",
+                    "default": false,
+                    "fullName": "High"
+                  },
+                  {
+                    "label": "Critical",
+                    "default": false,
+                    "fullName": "Critical"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        }
+      ],
+      "summary": "Create the Customer Feedback custom object with Auto Number record name, enabling Reports, Activities, and Field History Tracking. Then create 10 custom fields: Customer Name (Text), Customer Email (Email), Feedback Date (Date), Rating (Picklist), Feedback Description (Long Text Area), Product Name (Text), Resolved (Checkbox), Resolution Date (Date), Support Agent (Text), and Priority (Picklist)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-15T10:46:47.29341+00:00"
+  },
+  {
+    "id": "2d2cb282-07bd-4eee-9e98-d05443fc06f4",
+    "conversation_id": "12fc4ce8-de56-4ed9-bbd5-450d5bf11b95",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee__c",
+          "metadata": {
+            "label": "Employee",
+            "nameField": {
+              "type": "AutoNumber",
+              "label": "Employee ID",
+              "displayFormat": "EMP-{0000}",
+              "startingNumber": 1
+            },
+            "pluralLabel": "Employees",
+            "sharingModel": "ReadWrite",
+            "enableHistory": true,
+            "enableReports": true,
+            "deploymentStatus": "Deployed",
+            "enableActivities": true
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Full_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Full Name",
+            "length": 100
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Email__c",
+          "metadata": {
+            "type": "Email",
+            "label": "Email"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Phone_Number__c",
+          "metadata": {
+            "type": "Phone",
+            "label": "Phone Number"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Date_of_Joining__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Date of Joining"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Salary__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Salary",
+            "scale": 2,
+            "precision": 16
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Department__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Department",
+            "valueSet": {
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "HR",
+                    "default": false,
+                    "fullName": "HR"
+                  },
+                  {
+                    "label": "IT",
+                    "default": false,
+                    "fullName": "IT"
+                  },
+                  {
+                    "label": "Finance",
+                    "default": false,
+                    "fullName": "Finance"
+                  },
+                  {
+                    "label": "Sales",
+                    "default": false,
+                    "fullName": "Sales"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Active_Employee__c",
+          "metadata": {
+            "type": "Checkbox",
+            "label": "Active Employee",
+            "defaultValue": true
+          }
+        }
+      ],
+      "summary": "Create Employee__c custom object with Auto Number name field, enable reports, activities, and field history, then create 7 custom fields: Full_Name__c (Text), Email__c (Email), Phone_Number__c (Phone), Date_of_Joining__c (Date), Salary__c (Currency), Department__c (Picklist), Active_Employee__c (Checkbox)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-15T10:58:54.377806+00:00"
+  },
+  {
+    "id": "db5a05f7-eb42-49ac-ae18-287abc73bc8b",
+    "conversation_id": "03266b41-5f73-4246-b995-3263d8770ae0",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee__c",
+          "metadata": {
+            "label": "Employee",
+            "nameField": {
+              "type": "AutoNumber",
+              "label": "Employee ID",
+              "displayFormat": "EMP-{0000}",
+              "startingNumber": 1
+            },
+            "pluralLabel": "Employees",
+            "sharingModel": "ReadWrite",
+            "enableHistory": true,
+            "enableReports": true,
+            "deploymentStatus": "Deployed",
+            "enableActivities": true
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Full_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Full Name",
+            "length": 100
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Email__c",
+          "metadata": {
+            "type": "Email",
+            "label": "Email"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Phone_Number__c",
+          "metadata": {
+            "type": "Phone",
+            "label": "Phone Number"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Date_of_Joining__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Date of Joining"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Salary__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Salary",
+            "scale": 2,
+            "precision": 16
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Department__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Department",
+            "valueSet": {
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "HR",
+                    "default": false,
+                    "fullName": "HR"
+                  },
+                  {
+                    "label": "IT",
+                    "default": false,
+                    "fullName": "IT"
+                  },
+                  {
+                    "label": "Finance",
+                    "default": false,
+                    "fullName": "Finance"
+                  },
+                  {
+                    "label": "Sales",
+                    "default": false,
+                    "fullName": "Sales"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee__c.Active_Employee__c",
+          "metadata": {
+            "type": "Checkbox",
+            "label": "Active Employee",
+            "defaultValue": true
+          }
+        }
+      ],
+      "summary": "Create Employee__c custom object with Auto Number name field, enable Reports, Activities, and Field History tracking, then create 7 custom fields: Full_Name__c (Text), Email__c (Email), Phone_Number__c (Phone), Date_of_Joining__c (Date), Salary__c (Currency), Department__c (Picklist), Active_Employee__c (Checkbox)."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-15T11:01:16.511249+00:00"
+  },
+  {
+    "id": "e15e0125-6e70-4114-aa41-4c97b3d821c7",
+    "conversation_id": "a797a86b-f237-4361-8698-9e97c0aaff34",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-15T11:50:52.246209+00:00"
+  },
+  {
+    "id": "6eed4600-83c5-48d0-991b-b660e977a7ca",
+    "conversation_id": "3d6cd1d5-8b0a-49c9-89b9-e55a8b8fb336",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:09:44.044754+00:00"
+  },
+  {
+    "id": "f0a3fa92-53ff-4d0d-a082-6631c5e31c72",
+    "conversation_id": "e0c3720f-4a84-49c6-ae8a-3dff51affd83",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:17:42.911544+00:00"
+  },
+  {
+    "id": "1245059e-cd61-46bb-abb8-4c713a312a08",
+    "conversation_id": "6abfba0d-9b57-4347-8998-984ab7f63729",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:22:04.74511+00:00"
+  },
+  {
+    "id": "fb4a9bb3-36ee-431a-b0cc-236103a4b489",
+    "conversation_id": "acaa201e-17bc-4259-91d7-52f1ff5a943f",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:22:25.549066+00:00"
+  },
+  {
+    "id": "e9fe9a9b-ffb5-4865-824c-d7e14b29d996",
+    "conversation_id": "6d041bac-3731-4e87-b05c-a0b5a4259efa",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "School__c",
+          "metadata": {
+            "label": "School",
+            "nameField": {
+              "type": "Text",
+              "label": "School Name"
+            },
+            "pluralLabel": "Schools",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        }
+      ],
+      "summary": "Create a new custom object School__c with standard configuration"
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:24:43.92826+00:00"
+  },
+  {
+    "id": "e7ea515c-6eba-415a-87a7-93bc60774bd7",
+    "conversation_id": "8acada49-c858-45f5-873c-bc56334c5445",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "School__c",
+          "metadata": {
+            "label": "School",
+            "nameField": {
+              "type": "Text",
+              "label": "Name"
+            },
+            "pluralLabel": "Schools",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        }
+      ],
+      "summary": "Create a new custom object named School__c with standard name field, deployed status, and ReadWrite sharing model."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:25:09.747725+00:00"
+  },
+  {
+    "id": "b75e6d54-e89e-4d17-a9b2-b1d29aef88ee",
+    "conversation_id": "043a01c1-8da6-4aed-835b-626350e00ab5",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:25:26.794474+00:00"
+  },
+  {
+    "id": "ad4e7f1e-3f20-46fe-9578-b8ccb11ca8ef",
+    "conversation_id": "72463f4b-9700-49b6-8f07-1afc09e960d9",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:35:58.633319+00:00"
+  },
+  {
+    "id": "0ac84de1-b520-4f7f-8180-04053ff16673",
+    "conversation_id": "f22586c9-76a0-4dfc-9b55-c993268d9d07",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:50:26.599008+00:00"
+  },
+  {
+    "id": "930cb1a9-1b72-4454-8a73-9847bc666284",
+    "conversation_id": "d41f17bc-81ce-42cf-93a2-6551c9f2121c",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:56:34.768968+00:00"
+  },
+  {
+    "id": "f69913eb-5eff-42ff-82db-5b027fea676f",
+    "conversation_id": "0e59cb44-c697-4cf7-ad56-526109ddf62b",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:58:15.386516+00:00"
+  },
+  {
+    "id": "eac4919d-8133-4b33-b64c-9f5bf265e98b",
+    "conversation_id": "526be42f-5f7d-4f15-9968-7b788be1872d",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "School__c",
+          "metadata": {
+            "label": "School",
+            "nameField": {
+              "type": "Text",
+              "label": "School Name"
+            },
+            "pluralLabel": "Schools",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        }
+      ],
+      "summary": "Create a new custom object called School__c with a standard name field, ReadWrite sharing, and Deployed status."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T09:59:24.891952+00:00"
+  },
+  {
+    "id": "52bab4de-c490-4121-be6e-2c4e746a4ee7",
+    "conversation_id": "479ca6a2-a911-4aac-9cc0-14ded88e9482",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:01:41.88819+00:00"
+  },
+  {
+    "id": "37e00e3c-5982-4366-87fd-c8abb929a16f",
+    "conversation_id": "9b5e89fd-8581-4613-a8a1-69db8d90a8d5",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:06:34.833819+00:00"
+  },
+  {
+    "id": "398fb118-b45c-4b9f-ad16-786bcffd0b6e",
+    "conversation_id": "0bd8e0c8-a75d-4697-91a6-be3a5c19729b",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Project__c",
+          "metadata": {
+            "label": "Employee Project",
+            "nameField": {
+              "type": "Text",
+              "label": "Employee Project Name"
+            },
+            "pluralLabel": "Employee Projects",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Project_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Project Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Employee_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Employee Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Status__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Status",
+            "valueSet": {
+              "valueSetDefinition": {
+                "values": [
+                  {
+                    "default": true,
+                    "fullName": "Not Started"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "In Progress"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "On Hold"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "Completed"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "Cancelled"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Start_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Start Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.End_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "End Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Budget__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Budget",
+            "scale": 2,
+            "precision": 18
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectService",
+          "metadata": {
+            "body": "public with sharing class EmployeeProjectService {\n\n    /**\n     * Inner class to hold Employee Project input parameters.\n     */\n    public class EmployeeProjectInput {\n        public String projectName;\n        public String employeeName;\n        public String status;\n        public Date startDate;\n        public Date endDate;\n        public Decimal budget;\n\n        public EmployeeProjectInput(\n            String projectName,\n            String employeeName,\n            String status,\n            Date startDate,\n            Date endDate,\n            Decimal budget\n        ) {\n            this.projectName  = projectName;\n            this.employeeName = employeeName;\n            this.status       = status;\n            this.startDate    = startDate;\n            this.endDate      = endDate;\n            this.budget       = budget;\n        }\n    }\n\n    /**\n     * Creates and inserts a list of Employee_Project__c records.\n     * @param inputs  List of EmployeeProjectInput wrapper objects\n     * @return        List of inserted Employee_Project__c records\n     */\n    public static List<Employee_Project__c> createEmployeeProjects(\n        List<EmployeeProjectInput> inputs\n    ) {\n        if (inputs == null || inputs.isEmpty()) {\n            return new List<Employee_Project__c>();\n        }\n\n        List<Employee_Project__c> recordsToInsert = new List<Employee_Project__c>();\n\n        for (EmployeeProjectInput input : inputs) {\n            Employee_Project__c ep = new Employee_Project__c(\n                Project_Name__c  = input.projectName,\n                Employee_Name__c = input.employeeName,\n                Status__c        = input.status,\n                Start_Date__c    = input.startDate,\n                End_Date__c      = input.endDate,\n                Budget__c        = input.budget\n            );\n            recordsToInsert.add(ep);\n        }\n\n        insert recordsToInsert;\n        return recordsToInsert;\n    }\n\n    /**\n     * Convenience method to create a single Employee Project record.\n     * @param projectName   Name of the project\n     * @param employeeName  Name of the employee\n     * @param status        Status picklist value\n     * @param startDate     Project start date\n     * @param endDate       Project end date\n     * @param budget        Allocated budget\n     * @return              Inserted Employee_Project__c record\n     */\n    public static Employee_Project__c createSingleEmployeeProject(\n        String projectName,\n        String employeeName,\n        String status,\n        Date startDate,\n        Date endDate,\n        Decimal budget\n    ) {\n        List<EmployeeProjectInput> inputs = new List<EmployeeProjectInput>{\n            new EmployeeProjectInput(projectName, employeeName, status, startDate, endDate, budget)\n        };\n        List<Employee_Project__c> results = createEmployeeProjects(inputs);\n        return results.isEmpty() ? null : results[0];\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectServiceTest",
+          "metadata": {
+            "body": "@isTest\nprivate class EmployeeProjectServiceTest {\n\n    // ----------------------------------------------------------------\n    // Helper: builds a single EmployeeProjectInput\n    // ----------------------------------------------------------------\n    private static EmployeeProjectService.EmployeeProjectInput buildInput(\n        String projectName,\n        String employeeName,\n        String status,\n        Date startDate,\n        Date endDate,\n        Decimal budget\n    ) {\n        return new EmployeeProjectService.EmployeeProjectInput(\n            projectName, employeeName, status, startDate, endDate, budget\n        );\n    }\n\n    // ----------------------------------------------------------------\n    // Test 1: Single record insert via convenience method\n    // ----------------------------------------------------------------\n    @isTest\n    static void testCreateSingleEmployeeProject() {\n        Date startDate = Date.newInstance(2024, 1, 15);\n        Date endDate   = Date.newInstance(2024, 6, 30);\n\n        Test.startTest();\n        Employee_Project__c result = EmployeeProjectService.createSingleEmployeeProject(\n            'Apollo Initiative',\n            'Jane Doe',\n            'In Progress',\n            startDate,\n            endDate,\n            50000.00\n        );\n        Test.stopTest();\n\n        System.assertNotEquals(null, result.Id,\n            'Record should have been inserted and have an Id.');\n\n        Employee_Project__c queried = [\n            SELECT Project_Name__c, Employee_Name__c, Status__c,\n                   Start_Date__c, End_Date__c, Budget__c\n            FROM Employee_Project__c\n            WHERE Id = :result.Id\n            LIMIT 1\n        ];\n\n        System.assertEquals('Apollo Initiative', queried.Project_Name__c,\n            'Project Name should match.');\n        System.assertEquals('Jane Doe', queried.Employee_Name__c,\n            'Employee Name should match.');\n        System.assertEquals('In Progress', queried.Status__c,\n            'Status should match.');\n        System.assertEquals(startDate, queried.Start_Date__c,\n            'Start Date should match.');\n        System.assertEquals(endDate, queried.End_Date__c,\n            'End Date should match.');\n        System.assertEquals(50000.00, queried.Budget__c,\n            'Budget should match.');\n    }\n\n    // ----------------------------------------------------------------\n    // Test 2: Bulk insert of 200 records\n    // ----------------------------------------------------------------\n    @isTest\n    static void testBulkCreateEmployeeProjects() {\n        List<EmployeeProjectService.EmployeeProjectInput> inputs =\n            new List<EmployeeProjectService.EmployeeProjectInput>();\n\n        for (Integer i = 1; i <= 200; i++) {\n            inputs.add(buildInput(\n                'Project ' + i,\n                'Employee ' + i,\n                'Not Started',\n                Date.newInstance(2024, 1, 1),\n                Date.newInstance(2024, 12, 31),\n                1000.00 * i\n            ));\n        }\n\n        Test.startTest();\n        List<Employee_Project__c> results =\n            EmployeeProjectService.createEmployeeProjects(inputs);\n        Test.stopTest();\n\n        System.assertEquals(200, results.size(),\n            'Should have inserted 200 records.');\n\n        Integer dbCount = [\n            SELECT COUNT()\n            FROM Employee_Project__c\n        ];\n        System.assertEquals(200, dbCount,\n            'Database should contain exactly 200 records.');\n    }\n\n    // ----------------------------------------------------------------\n    // Test 3: Empty input list returns empty list (no DML)\n    // ----------------------------------------------------------------\n    @isTest\n    static void testEmptyInputReturnsEmptyList() {\n        Test.startTest();\n        List<Employee_Project__c> results =\n            EmployeeProjectService.createEmployeeProjects(\n                new List<EmployeeProjectService.EmployeeProjectInput>()\n            );\n        Test.stopTest();\n\n        System.assertEquals(0, results.size(),\n            'Empty input should return an empty list.');\n    }\n\n    // ----------------------------------------------------------------\n    // Test 4: Null input list returns empty list (no DML)\n    // ----------------------------------------------------------------\n    @isTest\n    static void testNullInputReturnsEmptyList() {\n        Test.startTest();\n        List<Employee_Project__c> results =\n            EmployeeProjectService.createEmployeeProjects(null);\n        Test.stopTest();\n\n        System.assertEquals(0, results.size(),\n            'Null input should return an empty list.');\n    }\n\n    // ----------------------------------------------------------------\n    // Test 5: Verify default Status picklist value\n    // ----------------------------------------------------------------\n    @isTest\n    static void testDefaultStatusOnInsert() {\n        Test.startTest();\n        Employee_Project__c result = EmployeeProjectService.createSingleEmployeeProject(\n            'Beta Project',\n            'John Smith',\n            'Not Started',\n            Date.today(),\n            Date.today().addMonths(3),\n            75000.00\n        );\n        Test.stopTest();\n\n        Employee_Project__c queried = [\n            SELECT Status__c\n            FROM Employee_Project__c\n            WHERE Id = :result.Id\n            LIMIT 1\n        ];\n\n        System.assertEquals('Not Started', queried.Status__c,\n            'Default status should be Not Started.');\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        }
+      ],
+      "summary": "Create Employee_Project__c custom object with 6 custom fields, an Apex service class with insert logic, and a full test class."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:13:21.216255+00:00"
+  },
+  {
+    "id": "ed528554-6e4d-49d2-8ab9-96e0ea2645b3",
+    "conversation_id": "72469495-282e-485d-8cbe-47d62492291b",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Project__c",
+          "metadata": {
+            "label": "Employee Project",
+            "nameField": {
+              "type": "Text",
+              "label": "Employee Project Name"
+            },
+            "pluralLabel": "Employee Projects",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Project_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Project Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Employee_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Employee Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Status__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Status",
+            "valueSet": {
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "Active",
+                    "default": true,
+                    "fullName": "Active"
+                  },
+                  {
+                    "label": "Completed",
+                    "default": false,
+                    "fullName": "Completed"
+                  },
+                  {
+                    "label": "On Hold",
+                    "default": false,
+                    "fullName": "On Hold"
+                  },
+                  {
+                    "label": "Cancelled",
+                    "default": false,
+                    "fullName": "Cancelled"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Start_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Start Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.End_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "End Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Budget__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Budget",
+            "scale": 2,
+            "precision": 16
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectService",
+          "metadata": {
+            "body": "public with sharing class EmployeeProjectService {\n\n    /**\n     * Creates a list of Employee_Project__c records.\n     * Uses Database.insert for partial save support.\n     * @param projects List of Employee_Project__c records to insert\n     * @return List of Database.SaveResult\n     */\n    public static List<Database.SaveResult> createEmployeeProjects(List<Employee_Project__c> projects) {\n        if (projects == null || projects.isEmpty()) {\n            System.debug('No Employee Project records provided for insertion.');\n            return new List<Database.SaveResult>();\n        }\n\n        List<Database.SaveResult> results = Database.insert(projects, false);\n\n        for (Integer i = 0; i < results.size(); i++) {\n            Database.SaveResult sr = results[i];\n            if (sr.isSuccess()) {\n                System.debug('Successfully inserted Employee_Project__c with Id: ' + sr.getId());\n            } else {\n                for (Database.Error err : sr.getErrors()) {\n                    System.debug('Error inserting record at index ' + i + ': ' + err.getMessage() +\n                                 ' | Fields: ' + err.getFields());\n                }\n            }\n        }\n\n        return results;\n    }\n\n    /**\n     * Sample method to build and insert demo Employee Project records.\n     * Useful for testing or seeding data.\n     */\n    public static void insertSampleEmployeeProjects() {\n        List<Employee_Project__c> sampleProjects = new List<Employee_Project__c>();\n\n        sampleProjects.add(new Employee_Project__c(\n            Name             = 'EP-001',\n            Project_Name__c  = 'Digital Transformation Initiative',\n            Employee_Name__c = 'Alice Johnson',\n            Status__c        = 'Active',\n            Start_Date__c    = Date.today(),\n            End_Date__c      = Date.today().addMonths(6),\n            Budget__c        = 150000.00\n        ));\n\n        sampleProjects.add(new Employee_Project__c(\n            Name             = 'EP-002',\n            Project_Name__c  = 'Cloud Migration Project',\n            Employee_Name__c = 'Bob Martinez',\n            Status__c        = 'On Hold',\n            Start_Date__c    = Date.today().addDays(15),\n            End_Date__c      = Date.today().addMonths(9),\n            Budget__c        = 250000.00\n        ));\n\n        sampleProjects.add(new Employee_Project__c(\n            Name             = 'EP-003',\n            Project_Name__c  = 'HR System Upgrade',\n            Employee_Name__c = 'Carol Smith',\n            Status__c        = 'Completed',\n            Start_Date__c    = Date.today().addMonths(-3),\n            End_Date__c      = Date.today().addMonths(-1),\n            Budget__c        = 75000.00\n        ));\n\n        createEmployeeProjects(sampleProjects);\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectServiceTest",
+          "metadata": {
+            "body": "@isTest\nprivate class EmployeeProjectServiceTest {\n\n    // -------------------------------------------------------\n    // Helper: Build a list of Employee_Project__c test records\n    // -------------------------------------------------------\n    private static List<Employee_Project__c> buildTestProjects(Integer count) {\n        List<Employee_Project__c> projects = new List<Employee_Project__c>();\n        for (Integer i = 0; i < count; i++) {\n            projects.add(new Employee_Project__c(\n                Name             = 'EP-TEST-' + i,\n                Project_Name__c  = 'Test Project ' + i,\n                Employee_Name__c = 'Test Employee ' + i,\n                Status__c        = 'Active',\n                Start_Date__c    = Date.today(),\n                End_Date__c      = Date.today().addMonths(3),\n                Budget__c        = 10000.00 * (i + 1)\n            ));\n        }\n        return projects;\n    }\n\n    // -------------------------------------------------------\n    // Positive Test: Insert 200 records (bulk validation)\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_Positive() {\n        List<Employee_Project__c> testProjects = buildTestProjects(200);\n\n        Test.startTest();\n        List<Database.SaveResult> results = EmployeeProjectService.createEmployeeProjects(testProjects);\n        Test.stopTest();\n\n        // Validate all 200 records were inserted successfully\n        System.assertEquals(200, results.size(), 'Expected 200 SaveResults.');\n        for (Database.SaveResult sr : results) {\n            System.assert(sr.isSuccess(), 'Expected all records to insert successfully. Error: ' +\n                (sr.getErrors().isEmpty() ? 'None' : sr.getErrors()[0].getMessage()));\n        }\n\n        // Validate records are actually in the database\n        List<Employee_Project__c> inserted = [\n            SELECT Id, Project_Name__c, Employee_Name__c, Status__c, Start_Date__c, End_Date__c, Budget__c\n            FROM Employee_Project__c\n            WHERE Name LIKE 'EP-TEST-%'\n        ];\n        System.assertEquals(200, inserted.size(), 'Expected 200 records in the database.');\n        System.assertEquals('Active', inserted[0].Status__c, 'Expected Status to be Active.');\n    }\n\n    // -------------------------------------------------------\n    // Positive Test: insertSampleEmployeeProjects seeding method\n    // -------------------------------------------------------\n    @isTest\n    static void testInsertSampleEmployeeProjects() {\n        Test.startTest();\n        EmployeeProjectService.insertSampleEmployeeProjects();\n        Test.stopTest();\n\n        List<Employee_Project__c> inserted = [\n            SELECT Id, Name, Project_Name__c, Status__c\n            FROM Employee_Project__c\n            ORDER BY Name ASC\n        ];\n\n        System.assertEquals(3, inserted.size(), 'Expected 3 sample records to be inserted.');\n        System.assertEquals('EP-001', inserted[0].Name);\n        System.assertEquals('Active', inserted[0].Status__c);\n        System.assertEquals('EP-002', inserted[1].Name);\n        System.assertEquals('On Hold', inserted[1].Status__c);\n        System.assertEquals('EP-003', inserted[2].Name);\n        System.assertEquals('Completed', inserted[2].Status__c);\n    }\n\n    // -------------------------------------------------------\n    // Negative Test: Null input returns empty list\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_NullInput() {\n        Test.startTest();\n        List<Database.SaveResult> results = EmployeeProjectService.createEmployeeProjects(null);\n        Test.stopTest();\n\n        System.assertNotEquals(null, results, 'Result list should not be null.');\n        System.assertEquals(0, results.size(), 'Expected empty result list for null input.');\n    }\n\n    // -------------------------------------------------------\n    // Negative Test: Empty list input returns empty result\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_EmptyList() {\n        Test.startTest();\n        List<Database.SaveResult> results = EmployeeProjectService.createEmployeeProjects(\n            new List<Employee_Project__c>()\n        );\n        Test.stopTest();\n\n        System.assertNotEquals(null, results, 'Result list should not be null.');\n        System.assertEquals(0, results.size(), 'Expected empty result list for empty input.');\n    }\n\n    // -------------------------------------------------------\n    // Boundary Test: Single record insert\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_SingleRecord() {\n        List<Employee_Project__c> single = buildTestProjects(1);\n\n        Test.startTest();\n        List<Database.SaveResult> results = EmployeeProjectService.createEmployeeProjects(single);\n        Test.stopTest();\n\n        System.assertEquals(1, results.size(), 'Expected exactly 1 result.');\n        System.assert(results[0].isSuccess(), 'Single record insert should succeed.');\n        System.assertNotEquals(null, results[0].getId(), 'Inserted record should have a valid Id.');\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        }
+      ],
+      "summary": "Create Employee_Project__c custom object with 6 custom fields, an Apex service class with bulkified insert logic, and a full test class with positive and negative test scenarios."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:14:28.712964+00:00"
+  },
+  {
+    "id": "db96a56b-d0dc-498b-904e-b267560067f6",
+    "conversation_id": "25bc146e-6776-4fda-a416-ed2281ab0b73",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Project__c",
+          "metadata": {
+            "label": "Employee Project",
+            "nameField": {
+              "type": "Text",
+              "label": "Employee Project Name"
+            },
+            "pluralLabel": "Employee Projects",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Project_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Project Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Employee_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Employee Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Status__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Status",
+            "valueSet": {
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "default": true,
+                    "fullName": "Active"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "Completed"
+                  },
+                  {
+                    "default": false,
+                    "fullName": "On Hold"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Start_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Start Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.End_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "End Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Budget__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Budget",
+            "scale": 2,
+            "precision": 16
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectService",
+          "metadata": {
+            "body": "public with sharing class EmployeeProjectService {\n\n    /**\n     * Wrapper class to hold Employee Project data before insert\n     */\n    public class EmployeeProjectWrapper {\n        public String projectName;\n        public String employeeName;\n        public String status;\n        public Date startDate;\n        public Date endDate;\n        public Decimal budget;\n\n        public EmployeeProjectWrapper(\n            String projectName,\n            String employeeName,\n            String status,\n            Date startDate,\n            Date endDate,\n            Decimal budget\n        ) {\n            this.projectName  = projectName;\n            this.employeeName = employeeName;\n            this.status       = status;\n            this.startDate    = startDate;\n            this.endDate      = endDate;\n            this.budget       = budget;\n        }\n    }\n\n    /**\n     * Bulkified method to insert a list of Employee Project records.\n     * @param wrappers - List of EmployeeProjectWrapper instances\n     * @return List of inserted Employee_Project__c records\n     * @throws IllegalArgumentException if the input list is null or empty\n     */\n    public static List<Employee_Project__c> createEmployeeProjects(\n        List<EmployeeProjectWrapper> wrappers\n    ) {\n        if (wrappers == null || wrappers.isEmpty()) {\n            throw new IllegalArgumentException(\n                'Input list cannot be null or empty.'\n            );\n        }\n\n        List<Employee_Project__c> projectsToInsert = new List<Employee_Project__c>();\n\n        for (EmployeeProjectWrapper w : wrappers) {\n            Employee_Project__c ep = new Employee_Project__c(\n                Project_Name__c  = w.projectName,\n                Employee_Name__c = w.employeeName,\n                Status__c        = w.status,\n                Start_Date__c    = w.startDate,\n                End_Date__c      = w.endDate,\n                Budget__c        = w.budget\n            );\n            projectsToInsert.add(ep);\n        }\n\n        try {\n            insert projectsToInsert;\n        } catch (DmlException e) {\n            System.debug('DML Error during Employee Project insert: ' + e.getMessage());\n            throw e;\n        }\n\n        return projectsToInsert;\n    }\n\n    /**\n     * Query Employee Projects by Status.\n     * @param status - The picklist value to filter by\n     * @return List of matching Employee_Project__c records\n     */\n    public static List<Employee_Project__c> getProjectsByStatus(String status) {\n        if (String.isBlank(status)) {\n            throw new IllegalArgumentException('Status filter cannot be blank.');\n        }\n\n        return [\n            SELECT Id,\n                   Name,\n                   Project_Name__c,\n                   Employee_Name__c,\n                   Status__c,\n                   Start_Date__c,\n                   End_Date__c,\n                   Budget__c\n            FROM   Employee_Project__c\n            WHERE  Status__c = :status\n            ORDER BY Start_Date__c ASC\n        ];\n    }\n\n    /**\n     * Sample insert logic — demonstrates creating 3 Employee Project records.\n     */\n    public static void sampleInsert() {\n        List<EmployeeProjectWrapper> samples = new List<EmployeeProjectWrapper> {\n            new EmployeeProjectWrapper(\n                'Apollo Initiative',\n                'Jane Doe',\n                'Active',\n                Date.newInstance(2024, 1, 15),\n                Date.newInstance(2024, 6, 30),\n                75000.00\n            ),\n            new EmployeeProjectWrapper(\n                'Orion Rollout',\n                'John Smith',\n                'On Hold',\n                Date.newInstance(2024, 3, 1),\n                Date.newInstance(2024, 9, 1),\n                120000.00\n            ),\n            new EmployeeProjectWrapper(\n                'Zenith Upgrade',\n                'Alice Johnson',\n                'Completed',\n                Date.newInstance(2023, 7, 1),\n                Date.newInstance(2023, 12, 31),\n                45000.00\n            )\n        };\n\n        List<Employee_Project__c> inserted = createEmployeeProjects(samples);\n        System.debug('Successfully inserted ' + inserted.size() + ' Employee Project records.');\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectServiceTest",
+          "metadata": {
+            "body": "@isTest\nprivate class EmployeeProjectServiceTest {\n\n    // ----------------------------------------------------------------\n    // Helper: Build a list of wrappers for reuse across tests\n    // ----------------------------------------------------------------\n    private static List<EmployeeProjectService.EmployeeProjectWrapper> buildWrappers(\n        Integer count\n    ) {\n        List<EmployeeProjectService.EmployeeProjectWrapper> wrappers =\n            new List<EmployeeProjectService.EmployeeProjectWrapper>();\n\n        for (Integer i = 1; i <= count; i++) {\n            wrappers.add(\n                new EmployeeProjectService.EmployeeProjectWrapper(\n                    'Project ' + i,\n                    'Employee ' + i,\n                    'Active',\n                    Date.newInstance(2024, 1, i),\n                    Date.newInstance(2024, 6, i),\n                    1000.00 * i\n                )\n            );\n        }\n        return wrappers;\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 1: Positive — Bulk insert of multiple records\n    // ----------------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_Positive() {\n        List<EmployeeProjectService.EmployeeProjectWrapper> wrappers = buildWrappers(5);\n\n        Test.startTest();\n        List<Employee_Project__c> results =\n            EmployeeProjectService.createEmployeeProjects(wrappers);\n        Test.stopTest();\n\n        System.assertEquals(5, results.size(), 'Expected 5 records to be inserted.');\n\n        for (Employee_Project__c ep : results) {\n            System.assertNotEquals(null, ep.Id, 'Inserted record should have an Id.');\n        }\n\n        List<Employee_Project__c> dbRecords = [\n            SELECT Id, Project_Name__c, Status__c\n            FROM Employee_Project__c\n            WHERE Status__c = 'Active'\n        ];\n        System.assertEquals(5, dbRecords.size(), 'All 5 records should be in the database.');\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 2: Negative — Null input throws exception\n    // ----------------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_NullInput() {\n        Test.startTest();\n        try {\n            EmployeeProjectService.createEmployeeProjects(null);\n            System.assert(false, 'Exception should have been thrown for null input.');\n        } catch (IllegalArgumentException e) {\n            System.assertEquals(\n                'Input list cannot be null or empty.',\n                e.getMessage(),\n                'Exception message mismatch for null input.'\n            );\n        }\n        Test.stopTest();\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 3: Negative — Empty list throws exception\n    // ----------------------------------------------------------------\n    @isTest\n    static void testCreateEmployeeProjects_EmptyList() {\n        Test.startTest();\n        try {\n            EmployeeProjectService.createEmployeeProjects(\n                new List<EmployeeProjectService.EmployeeProjectWrapper>()\n            );\n            System.assert(false, 'Exception should have been thrown for empty list.');\n        } catch (IllegalArgumentException e) {\n            System.assertEquals(\n                'Input list cannot be null or empty.',\n                e.getMessage(),\n                'Exception message mismatch for empty list.'\n            );\n        }\n        Test.stopTest();\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 4: Query — getProjectsByStatus returns correct records\n    // ----------------------------------------------------------------\n    @isTest\n    static void testGetProjectsByStatus_ReturnsCorrectRecords() {\n        List<EmployeeProjectService.EmployeeProjectWrapper> wrappers = buildWrappers(3);\n\n        // Add one 'Completed' record\n        wrappers.add(\n            new EmployeeProjectService.EmployeeProjectWrapper(\n                'Legacy Project',\n                'Bob Brown',\n                'Completed',\n                Date.newInstance(2023, 1, 1),\n                Date.newInstance(2023, 12, 31),\n                50000.00\n            )\n        );\n\n        EmployeeProjectService.createEmployeeProjects(wrappers);\n\n        Test.startTest();\n        List<Employee_Project__c> activeProjects =\n            EmployeeProjectService.getProjectsByStatus('Active');\n        List<Employee_Project__c> completedProjects =\n            EmployeeProjectService.getProjectsByStatus('Completed');\n        Test.stopTest();\n\n        System.assertEquals(3, activeProjects.size(),   'Expected 3 Active records.');\n        System.assertEquals(1, completedProjects.size(), 'Expected 1 Completed record.');\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 5: Negative — Blank status throws exception in query method\n    // ----------------------------------------------------------------\n    @isTest\n    static void testGetProjectsByStatus_BlankStatus() {\n        Test.startTest();\n        try {\n            EmployeeProjectService.getProjectsByStatus('');\n            System.assert(false, 'Exception should have been thrown for blank status.');\n        } catch (IllegalArgumentException e) {\n            System.assertEquals(\n                'Status filter cannot be blank.',\n                e.getMessage(),\n                'Exception message mismatch for blank status.'\n            );\n        }\n        Test.stopTest();\n    }\n\n    // ----------------------------------------------------------------\n    // TEST 6: sampleInsert smoke test\n    // ----------------------------------------------------------------\n    @isTest\n    static void testSampleInsert() {\n        Test.startTest();\n        EmployeeProjectService.sampleInsert();\n        Test.stopTest();\n\n        Integer count = [\n            SELECT COUNT()\n            FROM Employee_Project__c\n        ];\n        System.assertEquals(3, count, 'sampleInsert should have created 3 records.');\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        }
+      ],
+      "summary": "Create Employee_Project__c custom object with 6 custom fields, an Apex service class with bulkified insert and query logic, and a full test class with positive, negative, and query coverage."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:21:10.139197+00:00"
+  },
+  {
+    "id": "73eca3b8-5926-46e9-8cf2-f6a7b2fe8ccf",
+    "conversation_id": "4f5a1556-be5d-4578-8cae-1e58648ba6ff",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "Employee_Project__c",
+          "metadata": {
+            "label": "Employee Project",
+            "nameField": {
+              "type": "Text",
+              "label": "Employee Project Name"
+            },
+            "pluralLabel": "Employee Projects",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Project_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Project Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Employee_Name__c",
+          "metadata": {
+            "type": "Text",
+            "label": "Employee Name",
+            "length": 255
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Status__c",
+          "metadata": {
+            "type": "Picklist",
+            "label": "Status",
+            "valueSet": {
+              "valueSetDefinition": {
+                "value": [
+                  {
+                    "label": "Not Started",
+                    "default": true,
+                    "fullName": "Not Started"
+                  },
+                  {
+                    "label": "In Progress",
+                    "default": false,
+                    "fullName": "In Progress"
+                  },
+                  {
+                    "label": "Completed",
+                    "default": false,
+                    "fullName": "Completed"
+                  },
+                  {
+                    "label": "On Hold",
+                    "default": false,
+                    "fullName": "On Hold"
+                  }
+                ],
+                "sorted": false
+              }
+            }
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Start_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "Start Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.End_Date__c",
+          "metadata": {
+            "type": "Date",
+            "label": "End Date"
+          }
+        },
+        {
+          "type": "CustomField",
+          "action": "create",
+          "fullName": "Employee_Project__c.Budget__c",
+          "metadata": {
+            "type": "Currency",
+            "label": "Budget",
+            "scale": 2,
+            "precision": 18
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectService",
+          "metadata": {
+            "body": "public with sharing class EmployeeProjectService {\n\n    /**\n     * Creates and inserts a list of Employee_Project__c records.\n     * Bulkified: accepts a List to avoid DML governor limit issues.\n     * @param projects List of Employee_Project__c records to insert\n     * @return List of inserted Employee_Project__c records (with Ids)\n     */\n    public static List<Employee_Project__c> createEmployeeProjects(List<Employee_Project__c> projects) {\n        if (projects == null || projects.isEmpty()) {\n            System.debug('EmployeeProjectService: No records to insert.');\n            return new List<Employee_Project__c>();\n        }\n\n        try {\n            insert projects;\n            System.debug('EmployeeProjectService: Successfully inserted ' + projects.size() + ' record(s).');\n        } catch (DmlException e) {\n            System.debug('EmployeeProjectService: DML Exception - ' + e.getMessage());\n            throw e;\n        }\n\n        return projects;\n    }\n\n    /**\n     * Sample factory method to build a single Employee_Project__c record.\n     * @param projectName  Name of the project\n     * @param employeeName Name of the employee\n     * @param status       Status picklist value\n     * @param startDate    Project start date\n     * @param endDate      Project end date\n     * @param budget       Project budget\n     * @return A new (unsaved) Employee_Project__c record\n     */\n    public static Employee_Project__c buildRecord(\n        String projectName,\n        String employeeName,\n        String status,\n        Date startDate,\n        Date endDate,\n        Decimal budget\n    ) {\n        return new Employee_Project__c(\n            Name           = projectName + ' - ' + employeeName,\n            Project_Name__c = projectName,\n            Employee_Name__c = employeeName,\n            Status__c      = status,\n            Start_Date__c  = startDate,\n            End_Date__c    = endDate,\n            Budget__c      = budget\n        );\n    }\n\n    /**\n     * Sample usage: builds and inserts a hardcoded demo record.\n     * Useful for quick manual testing via Anonymous Apex.\n     */\n    public static void insertSampleRecord() {\n        Employee_Project__c sample = buildRecord(\n            'Apollo Initiative',\n            'Jane Doe',\n            'In Progress',\n            Date.newInstance(2024, 1, 15),\n            Date.newInstance(2024, 6, 30),\n            75000.00\n        );\n        createEmployeeProjects(new List<Employee_Project__c>{ sample });\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        },
+        {
+          "type": "ApexClass",
+          "action": "create",
+          "fullName": "EmployeeProjectServiceTest",
+          "metadata": {
+            "body": "@isTest\nprivate class EmployeeProjectServiceTest {\n\n    // -------------------------------------------------------\n    // Helper: build a list of test records without inserting\n    // -------------------------------------------------------\n    private static List<Employee_Project__c> buildTestRecords(Integer count) {\n        List<Employee_Project__c> records = new List<Employee_Project__c>();\n        for (Integer i = 1; i <= count; i++) {\n            records.add(\n                EmployeeProjectService.buildRecord(\n                    'Project ' + i,\n                    'Employee ' + i,\n                    'Not Started',\n                    Date.newInstance(2024, 1, i),\n                    Date.newInstance(2024, 12, 28),\n                    (i * 1000.00)\n                )\n            );\n        }\n        return records;\n    }\n\n    // -------------------------------------------------------\n    // Positive Test: single record insert\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateSingleRecord() {\n        List<Employee_Project__c> records = buildTestRecords(1);\n\n        Test.startTest();\n        List<Employee_Project__c> result = EmployeeProjectService.createEmployeeProjects(records);\n        Test.stopTest();\n\n        System.assertEquals(1, result.size(), 'Should return 1 inserted record.');\n        System.assertNotEquals(null, result[0].Id, 'Inserted record should have an Id.');\n        System.assertEquals('Project 1', result[0].Project_Name__c, 'Project name should match.');\n        System.assertEquals('Employee 1', result[0].Employee_Name__c, 'Employee name should match.');\n        System.assertEquals('Not Started', result[0].Status__c, 'Status should be Not Started.');\n        System.assertEquals(1000.00, result[0].Budget__c, 'Budget should match.');\n    }\n\n    // -------------------------------------------------------\n    // Bulk Test: 200 records to verify bulkification\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateBulkRecords() {\n        List<Employee_Project__c> records = buildTestRecords(200);\n\n        Test.startTest();\n        List<Employee_Project__c> result = EmployeeProjectService.createEmployeeProjects(records);\n        Test.stopTest();\n\n        System.assertEquals(200, result.size(), 'Should insert 200 records.');\n        for (Employee_Project__c rec : result) {\n            System.assertNotEquals(null, rec.Id, 'Each record should have an Id.');\n        }\n\n        // Verify records persisted in DB\n        Integer dbCount = [SELECT COUNT() FROM Employee_Project__c];\n        System.assertEquals(200, dbCount, 'Database should contain 200 records.');\n    }\n\n    // -------------------------------------------------------\n    // Negative Test: null list — should return empty list\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateWithNullList() {\n        Test.startTest();\n        List<Employee_Project__c> result = EmployeeProjectService.createEmployeeProjects(null);\n        Test.stopTest();\n\n        System.assertNotEquals(null, result, 'Result should not be null.');\n        System.assertEquals(0, result.size(), 'Result should be an empty list for null input.');\n    }\n\n    // -------------------------------------------------------\n    // Negative Test: empty list — should return empty list\n    // -------------------------------------------------------\n    @isTest\n    static void testCreateWithEmptyList() {\n        Test.startTest();\n        List<Employee_Project__c> result = EmployeeProjectService.createEmployeeProjects(\n            new List<Employee_Project__c>()\n        );\n        Test.stopTest();\n\n        System.assertEquals(0, result.size(), 'Result should be empty for empty input.');\n    }\n\n    // -------------------------------------------------------\n    // Test: insertSampleRecord convenience method\n    // -------------------------------------------------------\n    @isTest\n    static void testInsertSampleRecord() {\n        Test.startTest();\n        EmployeeProjectService.insertSampleRecord();\n        Test.stopTest();\n\n        List<Employee_Project__c> inserted = [\n            SELECT Id, Project_Name__c, Employee_Name__c, Status__c, Budget__c\n            FROM Employee_Project__c\n            LIMIT 1\n        ];\n\n        System.assertEquals(1, inserted.size(), 'One sample record should be inserted.');\n        System.assertEquals('Apollo Initiative', inserted[0].Project_Name__c, 'Project name should match sample.');\n        System.assertEquals('Jane Doe', inserted[0].Employee_Name__c, 'Employee name should match sample.');\n        System.assertEquals('In Progress', inserted[0].Status__c, 'Status should be In Progress.');\n        System.assertEquals(75000.00, inserted[0].Budget__c, 'Budget should be 75000.');\n    }\n}",
+            "status": "Active",
+            "apiVersion": "59.0"
+          }
+        }
+      ],
+      "summary": "Create Employee_Project__c custom object with 6 custom fields, a service Apex class with bulkified insert logic, and a comprehensive test class."
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-18T10:39:08.862054+00:00"
+  },
+  {
+    "id": "c7205bb5-a62a-4cfe-adf6-f5d40ed022e2",
+    "conversation_id": "deb686d8-7b45-49a9-80a6-6aaf46a7471c",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T12:21:23.887431+00:00"
+  },
+  {
+    "id": "de436af9-a4d0-4102-8ad1-c470949d15b0",
+    "conversation_id": "e2a4d93a-a320-43e6-9598-2aa1a8c8c0ad",
+    "role": "user",
+    "content": "what is java",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T12:42:01.200047+00:00"
+  },
+  {
+    "id": "4858a6e7-e2e5-4591-a506-f641e7102961",
+    "conversation_id": "e2a4d93a-a320-43e6-9598-2aa1a8c8c0ad",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T12:42:04.151659+00:00"
+  },
+  {
+    "id": "38b60011-42e7-4c13-ae5d-b38a70578423",
+    "conversation_id": "21efce87-ea5c-4119-923b-75e84d6534e3",
+    "role": "user",
+    "content": "Write an Apex Trigger for...",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T13:39:11.456446+00:00"
+  },
+  {
+    "id": "1c2bd5eb-2359-44c3-9213-4209005ed57c",
+    "conversation_id": "21efce87-ea5c-4119-923b-75e84d6534e3",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-18T13:39:14.500863+00:00"
+  },
+  {
+    "id": "793ffd35-f78f-4915-9322-22cc9b66a8cf",
+    "conversation_id": "c142ef9b-5c1d-467c-80cc-ea135b3e6884",
+    "role": "user",
+    "content": "in my org i have a custom obje name is Vehicle Services im  unable to get the object in app lanchuer even i created the tab check it and mke it available in app lanchuer",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-25T15:18:50.078447+00:00"
+  },
+  {
+    "id": "7202c721-cc4e-4ebf-93e0-08f769e62a9e",
+    "conversation_id": "c142ef9b-5c1d-467c-80cc-ea135b3e6884",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomTab",
+          "action": "create",
+          "fullName": "Vehicle_Services__c",
+          "metadata": {
+            "label": "Vehicle Services",
+            "motif": "Custom62: Truck",
+            "customObject": true,
+            "defaultTabVisibility": "DefaultOn"
+          }
+        },
+        {
+          "type": "CustomApplication",
+          "action": "create",
+          "fullName": "Vehicle_Services_App",
+          "metadata": {
+            "tabs": [
+              "standard-home",
+              "Vehicle_Services__c"
+            ],
+            "label": "Vehicle Services",
+            "uiType": "Lightning",
+            "navType": "Standard",
+            "description": "Lightning App for Vehicle Services",
+            "appPreferences": {
+              "enableSkinning": true,
+              "saveUserSessions": true,
+              "enableListViewHover": true,
+              "enableRecentlyViewed": true,
+              "enableCustomizeMyTabs": true,
+              "enableStateAndCountry": false,
+              "enableSubtabComponents": false,
+              "enableKeyboardShortcuts": true,
+              "enableListViewInlineEdit": true,
+              "enableSalesforceAppDropDown": true
+            },
+            "setupExperience": "both",
+            "isServiceCloudConsole": false,
+            "profileActionOverrides": [],
+            "isNavAutoTempTabsDisabled": false,
+            "isNavPersonalizationDisabled": false,
+            "isNavComponentFrameworkEnabled": true
+          }
+        }
+      ],
+      "summary": "Create a Custom Tab for Vehicle_Services__c and add it to a Lightning App to make it visible in the App Launcher"
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-25T15:18:53.097893+00:00"
+  },
+  {
+    "id": "ebac4f06-ecd7-47e2-8dde-b3f535f41a47",
+    "conversation_id": "c142ef9b-5c1d-467c-80cc-ea135b3e6884",
+    "role": "user",
+    "content": "Vehicle_Services__c this is the api name ",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-05-25T15:20:08.316967+00:00"
+  },
+  {
+    "id": "5c481405-b14e-4dc8-ad76-9c437ac50d67",
+    "conversation_id": "c142ef9b-5c1d-467c-80cc-ea135b3e6884",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomTab",
+          "action": "create",
+          "fullName": "Vehicle_Services__c",
+          "metadata": {
+            "label": "Vehicle Services",
+            "motif": "Custom62: Truck",
+            "customObject": true,
+            "defaultTabVisibility": "DefaultOn"
+          }
+        },
+        {
+          "type": "CustomApplication",
+          "action": "create",
+          "fullName": "Vehicle_Services_App",
+          "metadata": {
+            "tabs": [
+              "standard-home",
+              "Vehicle_Services__c"
+            ],
+            "label": "Vehicle Services",
+            "uiType": "Lightning",
+            "navType": "Standard",
+            "description": "Lightning App for Vehicle Services",
+            "appPreferences": {
+              "enableSkinning": true,
+              "saveUserSessions": true,
+              "enableListViewHover": true,
+              "enableRecentlyViewed": true,
+              "enableCustomizeMyTabs": true,
+              "enableStateAndCountry": false,
+              "enableSubtabComponents": false,
+              "enableKeyboardShortcuts": true,
+              "enableListViewInlineEdit": true,
+              "enableSalesforceAppDropDown": true
+            },
+            "setupExperience": "both",
+            "isServiceCloudConsole": false,
+            "profileActionOverrides": [],
+            "isNavAutoTempTabsDisabled": false,
+            "isNavPersonalizationDisabled": false,
+            "isNavComponentFrameworkEnabled": true
+          }
+        }
+      ],
+      "summary": "Create a Custom Tab for Vehicle_Services__c and add it to a Lightning App to make it visible in the App Launcher"
+    },
+    "confidence_score": null,
+    "created_at": "2026-05-25T15:20:10.943071+00:00"
+  },
+  {
+    "id": "21ae5f8d-147f-4bca-97df-c8de320596ad",
+    "conversation_id": "ec57343e-71a5-4d82-a5b5-38aac1021d77",
+    "role": "user",
+    "content": "create a custom object name is School__c",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-06-02T04:11:29.189931+00:00"
+  },
+  {
+    "id": "6cdf4416-73d2-4ae8-87be-14b2ae18bc7d",
+    "conversation_id": "ec57343e-71a5-4d82-a5b5-38aac1021d77",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "School__c",
+          "metadata": {
+            "label": "School",
+            "nameField": {
+              "type": "Text",
+              "label": "School Name"
+            },
+            "pluralLabel": "Schools",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        }
+      ],
+      "summary": "Create a new custom object called School__c in the Covenant Synergy Private Limited org."
+    },
+    "confidence_score": null,
+    "created_at": "2026-06-02T04:11:32.267184+00:00"
+  },
+  {
+    "id": "46a13a3c-33f2-45b3-8434-efc5d5882b2d",
+    "conversation_id": "ec57343e-71a5-4d82-a5b5-38aac1021d77",
+    "role": "user",
+    "content": "deploy this",
+    "implementation_plan": null,
+    "confidence_score": null,
+    "created_at": "2026-06-02T04:12:15.590582+00:00"
+  },
+  {
+    "id": "f0188648-0e04-47c3-8d6f-828bd40c8303",
+    "conversation_id": "ec57343e-71a5-4d82-a5b5-38aac1021d77",
+    "role": "assistant",
+    "content": "",
+    "implementation_plan": {
+      "items": [
+        {
+          "type": "CustomObject",
+          "action": "create",
+          "fullName": "School__c",
+          "metadata": {
+            "label": "School",
+            "nameField": {
+              "type": "Text",
+              "label": "School Name"
+            },
+            "pluralLabel": "Schools",
+            "sharingModel": "ReadWrite",
+            "deploymentStatus": "Deployed"
+          }
+        }
+      ],
+      "summary": "Deploy the School__c custom object to the Covenant Synergy Private Limited org."
+    },
+    "confidence_score": null,
+    "created_at": "2026-06-02T04:12:17.394094+00:00"
+  }
+]
