@@ -101,7 +101,7 @@ export default async function DashboardPage({
             Refresh Metadata
           </button>
           <a 
-            href="/setup" 
+            href="/api/auth/salesforce" 
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-[0_10px_20px_rgba(47,129,247,0.2)] hover:scale-[1.02] transition-all"
           >
             Re-authenticate

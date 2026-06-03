@@ -89,7 +89,10 @@ export default function SetupPage() {
     }
   };
 
-  // Removed OAuth fallback function
+  const handleFallbackOAuth = () => {
+    window.location.href = '/api/auth/salesforce';
+  };
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-12 px-6 bg-[#020817] min-h-screen text-white overflow-y-auto">
       <div className="w-full max-w-[560px] flex flex-col gap-6">
@@ -100,12 +103,11 @@ export default function SetupPage() {
             Forge AI
           </h1>
           <p className="text-white/40 text-[10px] uppercase tracking-[0.25em] font-bold mt-1">
-            Connect Your Salesforce Org
+            Zero-Key Salesforce Connection
           </p>
-          <div className="max-w-md text-white/50 text-[12px] leading-relaxed mt-2 font-medium flex flex-col gap-1">
-            <p className="text-white"><strong>Step 1:</strong> Run <code>sfdx auth:web:login</code> in your terminal</p>
-            <p className="text-white"><strong>Step 2:</strong> Click the 'Detect My Orgs' button below if your org doesn't appear.</p>
-          </div>
+          <p className="max-w-md text-white/50 text-[12px] leading-relaxed mt-2 font-medium">
+            Forge AI detected your local Salesforce CLI environment. Select a configured org to connect instantly without entering credentials or OAuth client keys.
+          </p>
         </div>
 
         {/* Connection Status / Loader */}
@@ -144,23 +146,9 @@ export default function SetupPage() {
                   Select an active local sandbox or developer hub
                 </p>
               </div>
-              <div className="flex gap-2 items-center">
-                <span className="bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
-                  {orgs.length} Found
-                </span>
-                <button 
-                  onClick={() => {
-                    setLoading(true);
-                    fetch('/api/auth/sfdx-orgs')
-                      .then(r => r.json())
-                      .then(d => setOrgs(d.orgs || []))
-                      .finally(() => setLoading(false));
-                  }}
-                  className="bg-white/10 hover:bg-white/20 text-white text-[9px] font-bold uppercase px-3 py-1 rounded-full transition-colors"
-                >
-                  Detect My Orgs
-                </button>
-              </div>
+              <span className="bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
+                {orgs.length} Found
+              </span>
             </div>
 
             {/* Content List */}
@@ -225,7 +213,20 @@ export default function SetupPage() {
                   })}
                 </div>
               )}
-              {/* End of Content List */}
+
+              {/* Standard OAuth Fallback */}
+              <div className="border-t border-white/5 pt-5 flex flex-col gap-3">
+                <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] self-center">
+                  OR USE TRADITIONAL AUTHENTICATION
+                </span>
+                <button
+                  onClick={handleFallbackOAuth}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-[12px] shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <Cloud className="w-4 h-4 text-[#00a1e0]" />
+                  Authenticate via Salesforce Web Browser
+                </button>
+              </div>
             </div>
           </div>
         )}
