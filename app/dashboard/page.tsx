@@ -24,6 +24,7 @@ import { GitPR } from '@/components/GitPR';
 import { OrgPipeline } from '@/components/OrgPipeline';
 import { PromoteOrg } from '@/components/PromoteOrg';
 import { FullFlow } from '@/components/FullFlow';
+import { ActiveOrgSync } from '@/components/ActiveOrgSync';
 
 export default async function DashboardPage({
   searchParams,
@@ -86,6 +87,7 @@ export default async function DashboardPage({
   }
   return (
     <div className="flex-1 flex flex-col p-8 gap-8 overflow-y-auto no-scrollbar animate-in fade-in duration-700">
+      <ActiveOrgSync instanceUrl={tokenData?.instance_url} />
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight">Org Dashboard</h1>

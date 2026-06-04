@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 
 export function AIBuilding() {
   const searchParams = useSearchParams();
@@ -23,8 +24,7 @@ export function AIBuilding() {
     async function loadData() {
       try {
         // Load Org
-        const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-        const activeOrg = orgs && orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' };
+        const activeOrg = await getActiveOrg(supabase) || { alias: 'Acme Corp', instance_url: '' };
         setOrg(activeOrg);
 
         let targetId = deployId;

@@ -203,6 +203,15 @@ export async function GET(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     })
 
+    // Set non-HttpOnly cookie for client components to read active instance url
+    response.cookies.set('sf_active_instance_url', tokens.instance_url, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    })
+
     return response
   } catch (err: any) {
     console.error('[SF Callback] Exception during token exchange:', err)

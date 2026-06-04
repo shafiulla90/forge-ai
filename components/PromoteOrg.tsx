@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 import { Loader2 } from 'lucide-react';
 
 export function PromoteOrg() {
@@ -20,8 +21,7 @@ export function PromoteOrg() {
   useEffect(() => {
     async function loadData() {
       try {
-        const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-        const activeOrg = orgs && orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' };
+        const activeOrg = await getActiveOrg(supabase) || { alias: 'Acme Corp', instance_url: '' };
         setOrg(activeOrg);
 
         let targetId = deployId;

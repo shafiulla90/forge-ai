@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 
 function generateAcceptanceCriteria(plan: any): string[] {
   if (!plan) return [
@@ -79,8 +80,8 @@ export function JiraPost() {
     async function loadPlanData() {
       try {
         // 1. Fetch connected org
-        const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-        if (orgs && orgs.length > 0) setOrg(orgs[0]);
+        const activeOrg = await getActiveOrg(supabase);
+        if (activeOrg) setOrg(activeOrg);
 
         // 2. Fetch connection details to prefill project key
         const { data: conn } = await supabase

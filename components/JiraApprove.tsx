@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 
 function generateAcceptanceCriteria(plan: any): string[] {
   if (!plan) return [
@@ -77,8 +78,8 @@ useEffect(() => {
     async function loadDeploymentData() {
       try {
         // Load Org
-        const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-        if (orgs && orgs.length > 0) setOrg(orgs[0]);
+        const activeOrg = await getActiveOrg(supabase);
+        if (activeOrg) setOrg(activeOrg);
 
         if (deployId.startsWith('mock-')) {
           // Pre-populate mock deployment structure

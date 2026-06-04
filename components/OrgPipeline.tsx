@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 
 export function OrgPipeline() {
   const searchParams = useSearchParams();
@@ -159,9 +160,14 @@ export function OrgPipeline() {
   useEffect(() => {
     async function loadData() {
       try {
-        const { data: orgs } = await supabase.from('orgs').select('*');
-        setAllOrgs(orgs || []);
-        const activeOrg = orgs && orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' };
+        const { data: { user } } = await supabase.auth.getUser();
+        let orgs: any[] = [];
+        if (user) {
+          const { data } = await supabase.from('orgs').select('*').eq('user_id', user.id);
+          orgs = data || [];
+        }
+        setAllOrgs(orgs);
+        const activeOrg = await getActiveOrg(supabase) || (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
         setOrg(activeOrg);
 
         let targetId = deployId;

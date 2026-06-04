@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -40,20 +41,41 @@ export function ReviewPlan() {
     setMounted(true);
     
     async function loadData() {
-      // 1. Load Org
-      const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-      if (orgs && orgs.length > 0) setOrg(orgs[0]);
-
-      // 2. Fetch Recent Plans from Supabase
-      const { data: plansData } = await supabase
-        .from('messages')
-        .select('*, conversations(id, title)')
-        .not('implementation_plan', 'is', null)
-        .order('created_at', { ascending: false });
-
-      if (plansData) {
-        setRecentPlans(plansData);
+      // 1. Fetch User & Active Org
+      const activeOrg = await getActiveOrg(supabase);
+      if (!activeOrg) {
+        setLoading(false);
+        return;
       }
+      setOrg(activeOrg);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch User's Conversations for the Active Org to filter recent plans
+      const { data: userConvos } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('org_id', activeOrg.id);
+      
+      const convoIds = userConvos ? userConvos.map(c => c.id) : [];
+
+      // 3. Fetch Recent Plans from Supabase (filtered by User's Conversations for the Active Org)
+      let plansData = [];
+      if (convoIds.length > 0) {
+        const { data } = await supabase
+          .from('messages')
+          .select('*, conversations(id, title)')
+          .in('conversation_id', convoIds)
+          .not('implementation_plan', 'is', null)
+          .order('created_at', { ascending: false });
+        if (data) plansData = data;
+      }
+      setRecentPlans(plansData);
 
       // 3. Load Selected Plan
       let selectedMsg = null;

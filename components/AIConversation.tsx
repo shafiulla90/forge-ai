@@ -31,6 +31,7 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { getActiveOrg } from '@/lib/supabase-helpers';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -117,17 +118,29 @@ export function AIConversation() {
   // 1. Fetch Org & Initial Data
   useEffect(() => {
     async function init() {
-      const { data: orgs } = await supabase.from('orgs').select('*').limit(1);
-      if (orgs && orgs.length > 0) setOrg(orgs[0]);
-
-      const { data: convos } = await supabase.from('conversations').select('*').order('created_at', { ascending: false });
-      if (convos) {
-        setConversations(convos);
-        const partnerConvo = convos.find(c => c.title && c.title.toLowerCase().includes('partner referral'));
-        if (partnerConvo) {
-          setCurrentConvoId(partnerConvo.id);
-        } else if (convos.length > 0) {
-          setCurrentConvoId(convos[0].id);
+      const activeOrg = await getActiveOrg(supabase);
+      if (activeOrg) {
+        setOrg(activeOrg);
+        
+        // Load only the conversations belonging to this specific user and active org!
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: convos } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('org_id', activeOrg.id)
+            .order('created_at', { ascending: false });
+            
+          if (convos) {
+            setConversations(convos);
+            const partnerConvo = convos.find(c => c.title && c.title.toLowerCase().includes('partner referral'));
+            if (partnerConvo) {
+              setCurrentConvoId(partnerConvo.id);
+            } else if (convos.length > 0) {
+              setCurrentConvoId(convos[0].id);
+            }
+          }
         }
       }
     }
