@@ -6,6 +6,9 @@ import {
   Cloud, 
   CheckCircle2, 
   Plus,
+  HelpCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +35,13 @@ export function ConnectOrg() {
   const [alias, setAlias] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('https://forge-ai-gsn9.vercel.app/api/auth/salesforce/callback');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   
   // Defer rendering to client-side to prevent password manager extension hydration errors
   const [isMounted, setIsMounted] = useState(false);
@@ -179,6 +189,60 @@ export function ConnectOrg() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Connected App Setup Instructions Card */}
+        <div className="bg-[#0b1120] border border-white/5 rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-[#1e293b]/30 border-b border-white/5 px-5 py-3 flex items-center gap-2">
+            <HelpCircle className="w-4 h-4 text-[#00a1e0]" />
+            <h3 className="text-[13px] font-bold text-white tracking-tight">
+              How to create a Connected App in Salesforce
+            </h3>
+          </div>
+          <div className="p-5 flex flex-col gap-3.5 text-[11px] text-white/60 leading-relaxed font-medium">
+            <p className="text-white/40 font-semibold">
+              To connect your Salesforce Org, you must first register Forge AI as a secure Client Application in your org:
+            </p>
+            <ol className="list-decimal list-inside flex flex-col gap-2.5">
+              <li>
+                Log into your target Org, go to <strong className="text-white">Setup ➔ App Manager</strong>, and click <strong className="text-white">New Connected App</strong>.
+              </li>
+              <li>
+                Check the <strong className="text-white">Enable OAuth Settings</strong> box and set the <strong className="text-white">Callback URL</strong> to:
+                <div className="flex items-center gap-2 mt-1.5 p-2 bg-black/30 border border-white/5 rounded-lg text-white font-mono text-[9px] break-all select-all">
+                  <span>https://forge-ai-gsn9.vercel.app/api/auth/salesforce/callback</span>
+                  <button 
+                    onClick={handleCopy}
+                    className="ml-auto p-1 bg-white/5 hover:bg-white/10 rounded transition-colors text-white/50 hover:text-white"
+                    title="Copy to clipboard"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-[#3fb950]" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </li>
+              <li>
+                Select and add these <strong className="text-white">OAuth Scopes</strong>:
+                <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-white/50 font-mono text-[9.5px]">
+                  <li>Access the Salesforce API (api)</li>
+                  <li>Perform requests on your behalf at any time (refresh_token, offline_access)</li>
+                  <li>Full access (full)</li>
+                </ul>
+              </li>
+              <li>
+                Keep <strong className="text-white">Require Secret for Web Server Flow</strong> checked.
+              </li>
+              <li>
+                Save and wait 10 minutes. Click <strong className="text-white">Manage Consumer Details</strong> to get your <strong className="text-[#00a1e0]">Consumer Key</strong> (Client ID) and <strong className="text-[#00a1e0]">Consumer Secret</strong> (Client Secret).
+              </li>
+            </ol>
+            
+            <div className="mt-1 p-2 bg-[#1e293b]/20 border border-[#00a1e0]/10 rounded-lg flex gap-2">
+              <span className="text-[10px] text-[#00a1e0] font-bold shrink-0">TIP:</span>
+              <span className="text-white/45 text-[10px]">
+                If the "New Connected App" button is missing, search Setup for <strong>External Client Apps ➔ Settings</strong> and turn <strong>Allow creation of connected apps</strong> to ON.
+              </span>
             </div>
           </div>
         </div>
