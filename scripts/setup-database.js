@@ -61,6 +61,8 @@ async function run() {
           access_token TEXT,
           refresh_token TEXT,
           org_id TEXT,
+          client_id TEXT,
+          client_secret TEXT,
           metadata_synced_at TIMESTAMPTZ,
           object_count INT,
           field_count INT,
@@ -72,6 +74,10 @@ async function run() {
           health_score INT,
           last_synced_at TIMESTAMPTZ
       );
+
+      -- Add client_id and client_secret columns if they do not exist (for existing databases)
+      ALTER TABLE public.orgs ADD COLUMN IF NOT EXISTS client_id TEXT;
+      ALTER TABLE public.orgs ADD COLUMN IF NOT EXISTS client_secret TEXT;
 
       -- Table: user_configs
       CREATE TABLE IF NOT EXISTS public.user_configs (
