@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     response_type: 'code',
     client_id: clientId,
     redirect_uri: redirectUri,
-    scope: 'api refresh_token full',
+    scope: 'api refresh_token',
     prompt: 'login consent',
     state,
     code_challenge: codeChallenge,

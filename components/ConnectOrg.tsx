@@ -236,7 +236,6 @@ export function ConnectOrg() {
                     <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-white/50 font-mono text-[9.5px]">
                       <li>Access the Salesforce API (api)</li>
                       <li>Perform requests on your behalf at any time (refresh_token, offline_access)</li>
-                      <li>Full access (full)</li>
                     </ul>
                   </li>
                   <li>
