@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
   const customAlias = request.cookies.get('sf_oauth_alias')?.value
   const stage = request.cookies.get('sf_oauth_stage')?.value || ''
   const type = request.cookies.get('sf_oauth_type')?.value || ''
+  const cookieClientId = request.cookies.get('sf_oauth_client_id')?.value || ''
+  const cookieClientSecret = request.cookies.get('sf_oauth_client_secret')?.value || ''
 
   if (!storedState || storedState !== state) {
     console.error('[SF Callback] State mismatch. Expected:', storedState, 'Got:', state)
@@ -40,18 +42,20 @@ export async function GET(request: NextRequest) {
     // Dynamic Client ID and Secret selection based on target environment with fallback
     const defaultClientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
     const defaultClientSecret = (process.env.SALESFORCE_CLIENT_SECRET || '').trim();
-    let clientId = defaultClientId;
-    let clientSecret = defaultClientSecret;
+    let clientId = cookieClientId.trim() || defaultClientId;
+    let clientSecret = cookieClientSecret.trim() || defaultClientSecret;
 
-    if (stage === 'uat') {
-      clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
-      clientSecret = (process.env.SALESFORCE_UAT_CLIENT_SECRET || '').trim() || defaultClientSecret;
-    } else if (stage === 'qa') {
-      clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
-      clientSecret = (process.env.SALESFORCE_QA_CLIENT_SECRET || '').trim() || defaultClientSecret;
-    } else if (type === 'developer') {
-      clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
-      clientSecret = (process.env.SALESFORCE_DEV_CLIENT_SECRET || '').trim() || defaultClientSecret;
+    if (!cookieClientId.trim()) {
+      if (stage === 'uat') {
+        clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
+        clientSecret = (process.env.SALESFORCE_UAT_CLIENT_SECRET || '').trim() || defaultClientSecret;
+      } else if (stage === 'qa') {
+        clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
+        clientSecret = (process.env.SALESFORCE_QA_CLIENT_SECRET || '').trim() || defaultClientSecret;
+      } else if (type === 'developer') {
+        clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
+        clientSecret = (process.env.SALESFORCE_DEV_CLIENT_SECRET || '').trim() || defaultClientSecret;
+      }
     }
 
     const redirectUri = (process.env.SALESFORCE_REDIRECT_URI || `${appUrl}/api/auth/salesforce/callback`).trim();
@@ -186,6 +190,8 @@ export async function GET(request: NextRequest) {
     response.cookies.delete('sf_oauth_login_url')
     response.cookies.delete('sf_oauth_alias')
     response.cookies.delete('sf_oauth_stage')
+    response.cookies.delete('sf_oauth_client_id')
+    response.cookies.delete('sf_oauth_client_secret')
 
     // Optional: Also set the sf_tokens cookie if the dashboard still relies on it!
     const encryptedForClient = encrypt(JSON.stringify(tokenData))

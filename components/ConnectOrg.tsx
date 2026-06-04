@@ -30,6 +30,8 @@ export function ConnectOrg() {
 
   const [selectedType, setSelectedType] = useState(initialType);
   const [alias, setAlias] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
   
   // Defer rendering to client-side to prevent password manager extension hydration errors
   const [isMounted, setIsMounted] = useState(false);
@@ -42,10 +44,16 @@ export function ConnectOrg() {
   }
 
   const handleConnect = () => {
+    if (!clientId.trim() || !clientSecret.trim()) {
+      alert('Salesforce Client ID and Client Secret are required.');
+      return;
+    }
     const params = new URLSearchParams();
     if (selectedType) params.append('type', selectedType);
     if (alias) params.append('alias', alias);
     if (stage) params.append('stage', stage);
+    params.append('clientId', clientId.trim());
+    params.append('clientSecret', clientSecret.trim());
     window.location.href = `/api/auth/salesforce?${params.toString()}`;
   };
 
@@ -102,6 +110,36 @@ export function ConnectOrg() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Client ID Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-bold text-white/25 uppercase tracking-[0.15em]">
+                SALESFORCE CLIENT ID (CONSUMER KEY)
+              </label>
+              <input
+                type="text"
+                placeholder="Enter Consumer Key"
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                className="w-full bg-black/20 border border-white/5 rounded-lg px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-white/10 transition-all placeholder:text-white/10 font-medium"
+                required
+              />
+            </div>
+
+            {/* Client Secret Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-bold text-white/25 uppercase tracking-[0.15em]">
+                SALESFORCE CLIENT SECRET (CONSUMER SECRET)
+              </label>
+              <input
+                type="password"
+                placeholder="Enter Consumer Secret"
+                value={clientSecret}
+                onChange={(e) => setClientSecret(e.target.value)}
+                className="w-full bg-black/20 border border-white/5 rounded-lg px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-white/10 transition-all placeholder:text-white/10 font-medium"
+                required
+              />
             </div>
 
             {/* Alias Input */}

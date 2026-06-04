@@ -11,22 +11,26 @@ function base64URLEncode(buffer: Buffer) {
 export async function GET(request: Request) {
   console.log('--- OAuth Init ---');
   
-  // Extract type, alias and stage from query parameters
+  // Extract type, alias, stage and custom credentials from query parameters
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'production';
   const alias = searchParams.get('alias') || '';
   const stage = searchParams.get('stage') || '';
+  const customClientId = searchParams.get('clientId') || '';
+  const customClientSecret = searchParams.get('clientSecret') || '';
 
   // Dynamic Client ID selection based on target environment (with fallback)
   const defaultClientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
-  let clientId = defaultClientId;
+  let clientId = customClientId.trim() || defaultClientId;
 
-  if (stage === 'uat') {
-    clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
-  } else if (stage === 'qa') {
-    clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
-  } else if (type === 'developer') {
-    clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
+  if (!customClientId.trim()) {
+    if (stage === 'uat') {
+      clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
+    } else if (stage === 'qa') {
+      clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
+    } else if (type === 'developer') {
+      clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
+    }
   }
 
   if (!clientId) {
@@ -104,6 +108,12 @@ export async function GET(request: Request) {
   }
   if (stage) {
     response.cookies.set('sf_oauth_stage', stage, cookieOpts);
+  }
+  if (customClientId) {
+    response.cookies.set('sf_oauth_client_id', customClientId.trim(), cookieOpts);
+  }
+  if (customClientSecret) {
+    response.cookies.set('sf_oauth_client_secret', customClientSecret.trim(), cookieOpts);
   }
 
   return response;
