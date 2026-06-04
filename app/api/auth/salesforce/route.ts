@@ -17,15 +17,16 @@ export async function GET(request: Request) {
   const alias = searchParams.get('alias') || '';
   const stage = searchParams.get('stage') || '';
 
-  // Dynamic Client ID selection based on target environment
-  let clientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
+  // Dynamic Client ID selection based on target environment (with fallback)
+  const defaultClientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
+  let clientId = defaultClientId;
 
   if (stage === 'uat') {
-    clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim();
+    clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
   } else if (stage === 'qa') {
-    clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim();
+    clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
   } else if (type === 'developer') {
-    clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim();
+    clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
   }
 
   if (!clientId) {
@@ -33,7 +34,9 @@ export async function GET(request: Request) {
     return new NextResponse('Server configuration error: Missing Salesforce Client ID', { status: 500 });
   }
 
-  const rawRedirect = (process.env.SALESFORCE_REDIRECT_URI || '').trim();
+  const requestUrl = new URL(request.url);
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || `${requestUrl.protocol}//${requestUrl.host}`;
+  const rawRedirect = (process.env.SALESFORCE_REDIRECT_URI || `${appBaseUrl}/api/auth/salesforce/callback`).trim();
   const redirectUri = rawRedirect.replace(/\/+$/, '');
 
   // ─── LOGIN DOMAIN ────────────────────────────────────────────────────────────

@@ -37,20 +37,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Dynamic Client ID and Secret selection based on target environment
-    let clientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
-    let clientSecret = (process.env.SALESFORCE_CLIENT_SECRET || '').trim();
+    // Dynamic Client ID and Secret selection based on target environment with fallback
+    const defaultClientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
+    const defaultClientSecret = (process.env.SALESFORCE_CLIENT_SECRET || '').trim();
+    let clientId = defaultClientId;
+    let clientSecret = defaultClientSecret;
 
     if (stage === 'uat') {
-      clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim();
-      clientSecret = (process.env.SALESFORCE_UAT_CLIENT_SECRET || '').trim();
+      clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim() || defaultClientId;
+      clientSecret = (process.env.SALESFORCE_UAT_CLIENT_SECRET || '').trim() || defaultClientSecret;
     } else if (stage === 'qa') {
-      clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim();
-      clientSecret = (process.env.SALESFORCE_QA_CLIENT_SECRET || '').trim();
+      clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim() || defaultClientId;
+      clientSecret = (process.env.SALESFORCE_QA_CLIENT_SECRET || '').trim() || defaultClientSecret;
     } else if (type === 'developer') {
-      clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim();
-      clientSecret = (process.env.SALESFORCE_DEV_CLIENT_SECRET || '').trim();
+      clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim() || defaultClientId;
+      clientSecret = (process.env.SALESFORCE_DEV_CLIENT_SECRET || '').trim() || defaultClientSecret;
     }
+
+    const redirectUri = (process.env.SALESFORCE_REDIRECT_URI || `${appUrl}/api/auth/salesforce/callback`).trim();
 
     // Exchange authorization code for tokens dynamically using the target login URL domain
     const tokenUrl = `${oauthLoginUrl.trim()}/services/oauth2/token`
@@ -63,7 +67,7 @@ export async function GET(request: NextRequest) {
         grant_type: 'authorization_code',
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: process.env.SALESFORCE_REDIRECT_URI!.trim(),
+        redirect_uri: redirectUri,
         code,
         code_verifier: codeVerifier,
       }),
@@ -132,6 +136,8 @@ export async function GET(request: NextRequest) {
       access_token: encryptedAccessToken,
       refresh_token: encryptedRefreshToken,
       org_type: tokens.instance_url.includes('sandbox') ? 'sandbox' : 'production',
+      client_id: clientId,
+      client_secret: clientSecret,
       updated_at: new Date().toISOString(),
     }
 

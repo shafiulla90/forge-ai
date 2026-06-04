@@ -20,28 +20,16 @@ export async function createSalesforceConnection(orgId: string, supabaseClient?:
   const accessToken = decrypt(org.access_token);
   const refreshToken = decrypt(org.refresh_token);
   
-  // Dynamic Client ID and Secret selection based on target environment URL
-  let clientId = (process.env.SALESFORCE_CLIENT_ID || '').trim();
-  let clientSecret = (process.env.SALESFORCE_CLIENT_SECRET || '').trim();
+  // 3. Use stored client credentials if present, otherwise fall back to env vars
+  const clientId = org.client_id?.trim() || (process.env.SALESFORCE_CLIENT_ID || '').trim();
+  const clientSecret = org.client_secret?.trim() || (process.env.SALESFORCE_CLIENT_SECRET || '').trim();
 
-  const url = org.instance_url || '';
-  if (url.includes('uat')) {
-    clientId = (process.env.SALESFORCE_UAT_CLIENT_ID || '').trim();
-    clientSecret = (process.env.SALESFORCE_UAT_CLIENT_SECRET || '').trim();
-  } else if (url.includes('shafi')) {
-    clientId = (process.env.SALESFORCE_QA_CLIENT_ID || '').trim();
-    clientSecret = (process.env.SALESFORCE_QA_CLIENT_SECRET || '').trim();
-  } else if (url.includes('forgeaidevorg')) {
-    clientId = (process.env.SALESFORCE_DEV_CLIENT_ID || '').trim();
-    clientSecret = (process.env.SALESFORCE_DEV_CLIENT_SECRET || '').trim();
-  }
-
-  // 4. Create Connection
+  // 4. Create Connection using stored or env credentials
   const conn = new jsforce.Connection({
     oauth2: {
       clientId,
       clientSecret,
-      redirectUri: process.env.SALESFORCE_REDIRECT_URI,
+      redirectUri: process.env.SALESFORCE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/salesforce/callback`,
       loginUrl: org.instance_url,
     },
     instanceUrl: org.instance_url,
