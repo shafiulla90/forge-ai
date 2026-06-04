@@ -201,14 +201,19 @@ export function ConnectOrg() {
             <div className="bg-[#1e293b]/30 border-b border-white/5 px-5 py-3 flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-[#00a1e0]" />
               <h3 className="text-[13px] font-bold text-white tracking-tight">
-                How to create a Connected App in Salesforce
+                Salesforce Connected App Setup Guide
               </h3>
             </div>
-            <div className="p-5 flex flex-col gap-3.5 text-[11px] text-white/60 leading-relaxed font-medium flex-1 justify-between">
+            <div className="p-5 flex flex-col gap-3.5 text-[11.5px] text-white/60 leading-relaxed font-medium flex-1 justify-between">
               <div className="flex flex-col gap-3">
-                <p className="text-white/40 font-semibold">
-                  To connect your Salesforce Org, you must first register Forge AI as a secure Client Application in your org:
-                </p>
+                {/* Action Required Box */}
+                <div className="p-3 bg-[#00a1e0]/10 border border-[#00a1e0]/20 rounded-lg flex flex-col gap-1 text-[11px] text-[#00a1e0]">
+                  <span className="font-bold uppercase tracking-wider text-[9.5px]">🔑 Action Required:</span>
+                  <span className="text-white/75 leading-relaxed font-semibold">
+                    You must create a Connected App in your Salesforce Org to obtain the Client ID & Secret before you can connect.
+                  </span>
+                </div>
+
                 <ol className="list-decimal list-inside flex flex-col gap-2.5">
                   <li>
                     Log into your target Org, go to <strong className="text-white">Setup ➔ App Manager</strong>, and click <strong className="text-white">New Connected App</strong>.
@@ -238,7 +243,11 @@ export function ConnectOrg() {
                     Keep <strong className="text-white">Require Secret for Web Server Flow</strong> checked.
                   </li>
                   <li>
-                    Save and wait 10 minutes. Click <strong className="text-white">Manage Consumer Details</strong> to get your <strong className="text-[#00a1e0]">Consumer Key</strong> (Client ID) and <strong className="text-[#00a1e0]">Consumer Secret</strong> (Client Secret).
+                    Save and click <strong className="text-white">Manage Consumer Details</strong>. Verify your identity to reveal:
+                    <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-white/70 font-semibold">
+                      <li><span className="text-white">Consumer Key</span> ➔ Paste into <strong className="text-[#00a1e0]">Salesforce Client ID</strong></li>
+                      <li><span className="text-white">Consumer Secret</span> ➔ Paste into <strong className="text-[#00a1e0]">Salesforce Client Secret</strong></li>
+                    </ul>
                   </li>
                 </ol>
               </div>
