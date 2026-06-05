@@ -40,6 +40,17 @@ const preprocessMarkdown = (content: string): string => {
   return content.replace(/(!?\[.*?\])\((.*?)\)/g, (match, label, url) => {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
       let safeUrl = url.replace(/\s/g, '%20');
+      // Rewrite legacy pollinations URLs to our local redirect search endpoint
+      if (safeUrl.includes('pollinations.ai/prompt/')) {
+        try {
+          const urlObj = new URL(safeUrl);
+          const pathParts = urlObj.pathname.split('/');
+          const prompt = pathParts[pathParts.length - 1] || '';
+          safeUrl = `/api/chat/image?q=${prompt}`;
+        } catch (e) {
+          safeUrl = safeUrl.replace('https://image.pollinations.ai/prompt/', '/api/chat/image?q=');
+        }
+      }
       if (safeUrl.includes('pollinations.ai')) {
         safeUrl = safeUrl.replace(/\+/g, '%20');
       }
@@ -608,13 +619,17 @@ export function AIConversation() {
                           // Extract keywords for fallback from the prompt path
                           let keywords = 'design';
                           try {
-                            const urlObj = new URL(safeSrc);
-                            const pathParts = urlObj.pathname.split('/');
-                            const lastPart = pathParts[pathParts.length - 1];
-                            if (lastPart) {
-                              const decoded = decodeURIComponent(lastPart).replace(/[^a-zA-Z0-9,\s]/g, '');
-                              const parts = decoded.split(/[,\s+]+/);
-                              keywords = parts.slice(0, 3).join(',');
+                            const urlObj = new URL(safeSrc, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+                            if (urlObj.pathname.includes('/api/chat/image')) {
+                              keywords = urlObj.searchParams.get('q') || 'design';
+                            } else {
+                              const pathParts = urlObj.pathname.split('/');
+                              const lastPart = pathParts[pathParts.length - 1];
+                              if (lastPart) {
+                                const decoded = decodeURIComponent(lastPart).replace(/[^a-zA-Z0-9,\s]/g, '');
+                                const parts = decoded.split(/[,\s+]+/);
+                                keywords = parts.slice(0, 3).join(',');
+                              }
                             }
                           } catch (e) {
                             if (alt) {
@@ -623,7 +638,8 @@ export function AIConversation() {
                             }
                           }
                           
-                          const fallbackUrl = `https://loremflickr.com/800/600/${encodeURIComponent(keywords || 'design')}`;
+                          const fallbackUrl = `/api/chat/image?q=${encodeURIComponent(keywords || 'design')}`;
+                          const defaultFallback = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800';
 
                           return (
                             <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
@@ -634,9 +650,14 @@ export function AIConversation() {
                                 suppressHydrationWarning 
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
-                                  if (target.src !== fallbackUrl) {
-                                    console.log('Image load failed. Falling back to:', fallbackUrl);
+                                  // If the primary URL failed and it is NOT already using our local API, fall back to the local API
+                                  if (target.src !== fallbackUrl && !target.src.includes('/api/chat/image')) {
+                                    console.log('Image load failed. Falling back to local search:', fallbackUrl);
                                     target.src = fallbackUrl;
+                                  } else if (target.src !== defaultFallback) {
+                                    // If local API also fails (or was the primary source and failed), fall back to default unsplash image
+                                    console.log('Local search failed. Falling back to default:', defaultFallback);
+                                    target.src = defaultFallback;
                                   }
                                 }}
                               />
