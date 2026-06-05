@@ -15,6 +15,7 @@ export function JiraBoard() {
   const [sprintName, setSprintName] = useState('Active Sprint');
   const [dateRange, setDateRange] = useState('Current');
   const [isConnected, setIsConnected] = useState(false);
+  const [isMock, setIsMock] = useState(false);
 
   async function handleDisconnect() {
     try {
@@ -41,11 +42,16 @@ export function JiraBoard() {
       if (data.success && data.columns) {
         setColumns(data.columns);
         setIsConnected(data.isConnected ?? false);
+        setIsMock(data.isMock ?? false);
         if (data.sprintName) setSprintName(data.sprintName);
         if (data.dateRange) setDateRange(data.dateRange);
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('forge_jira_board', JSON.stringify(data));
         }
+      } else {
+        setIsConnected(data.isConnected ?? false);
+        setIsMock(data.isMock ?? false);
+        if (data.connectionError) throw new Error(data.connectionError);
       }
     } catch (err: any) {
       console.error(err);
@@ -65,6 +71,7 @@ export function JiraBoard() {
           if (data.columns) {
             setColumns(data.columns);
             setIsConnected(data.isConnected ?? false);
+            setIsMock(data.isMock ?? false);
             if (data.sprintName) setSprintName(data.sprintName);
             if (data.dateRange) setDateRange(data.dateRange);
             setLoading(false);
@@ -146,6 +153,20 @@ export function JiraBoard() {
           </button>
         </div>
       </div>
+
+      {/* Simulation/Mock Warning Banner */}
+      {isConnected && isMock && (
+        <div className="mx-6 mt-4 p-3.5 bg-[#1e1b0c] border border-[#d97706]/35 rounded-xl flex items-start gap-3 shadow-lg select-none">
+          <div className="text-[#f59e0b] text-[15px] mt-0.5 shrink-0">⚠️</div>
+          <div className="flex-1">
+            <div className="text-[10.5px] font-bold text-white uppercase tracking-wider">Using Simulation Mode</div>
+            <div className="text-[9.5px] text-[#d97706] mt-0.5 leading-relaxed">
+              Real Atlassian OAuth credentials are not configured in your environment. Forge is running in simulation mode. 
+              To connect your real Jira, please set <code className="font-mono bg-black/35 px-1.5 py-0.5 rounded text-white text-[9px] border border-[#d97706]/10">JIRA_CLIENT_ID</code> and <code className="font-mono bg-black/35 px-1.5 py-0.5 rounded text-white text-[9px] border border-[#d97706]/10">JIRA_CLIENT_SECRET</code> environment variables.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Kanban Board Layout */}
       {!isConnected ? (

@@ -20,6 +20,7 @@ export function JiraBuild() {
   const [todoTickets, setTodoTickets] = useState<any[]>([]);
   const [reviewTickets, setReviewTickets] = useState<any[]>([]);
   const [allOrgs, setAllOrgs] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -145,7 +146,12 @@ export function JiraBuild() {
                   status: data.ticket?.status || 'In review',
                 });
               }
+            } else {
+              setError(data.error || 'Failed to retrieve ticket details');
             }
+          } else {
+            const errData = await res.json().catch(() => ({ error: 'Jira API connection error' }));
+            setError(errData.error || 'Jira API connection error');
           }
         }
       } catch (err) {
@@ -356,7 +362,38 @@ export function JiraBuild() {
         </div>
 
         {/* Scrollable Main Area */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+        {error ? (
+          <div className="flex-1 flex items-center justify-center bg-[#050b16] p-6 relative overflow-hidden">
+            <div className="absolute top-1/4 left-1/3 w-[300px] h-[300px] bg-red-500/10 opacity-10 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <div className="relative backdrop-blur-xl bg-[#0d2137]/65 border border-red-500/20 rounded-[28px] p-10 max-w-[480px] text-center shadow-2xl flex flex-col items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-transparent border border-red-500/30 flex items-center justify-center shadow-inner">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" className="animate-bounce">
+                  <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <h2 className="text-[20px] font-black tracking-tight text-white select-none">Jira Connection Error</h2>
+                <p className="text-[12.5px] text-[#7ea5c9] leading-relaxed max-w-[380px] select-none">
+                  {error.includes('Unauthorized') || error.includes('Forbidden') || error.includes('refresh') 
+                    ? 'Your Jira authorization token has expired or is invalid. Please reconnect your Jira account.' 
+                    : error}
+                </p>
+              </div>
+
+              <Link 
+                href="/dashboard?view=jira-connect" 
+                className="mt-2 px-6 py-3.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-extrabold text-[11.5px] rounded-xl flex items-center gap-2 shadow-lg shadow-red-600/25 hover:shadow-red-600/40 transition-all hover:scale-[1.01] active:scale-[0.99] uppercase tracking-widest"
+              >
+                Reconnect Jira Account
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
           {/* Jira Ticket Card */}
           <div className="bg-[#031b2e] rounded-xl border border-[#1e3a52] overflow-hidden flex flex-col shrink-0">
             <div className="bg-[#032D60] p-3 flex items-center gap-2">
@@ -432,6 +469,7 @@ export function JiraBuild() {
             AI will read this Jira ticket, build all Salesforce changes in Dev Sandbox, self-evaluate, then ask for your review
           </div>
         </div>
+        )}
       </div>
     </div>
   );

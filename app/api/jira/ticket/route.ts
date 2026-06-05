@@ -1591,7 +1591,21 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[API Jira Ticket GET] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const errMsg = err?.message || '';
+    const isAuthError = 
+      errMsg.includes('401') || 
+      errMsg.includes('403') || 
+      errMsg.includes('Unauthorized') || 
+      errMsg.includes('Forbidden') || 
+      errMsg.includes('refresh token') || 
+      errMsg.includes('invalid_grant') ||
+      errMsg.includes('Failed to parse Connect Session Auth Token');
+      
+    return NextResponse.json({ 
+      success: false, 
+      error: err.message || 'Failed to fetch ticket from Jira', 
+      isAuthError 
+    }, { status: isAuthError ? 401 : 500 });
   }
 }
 

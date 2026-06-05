@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
   }
 
   let issues: any[] = [];
+  let isConnected = true;
+  let connectionError = null;
   // Map Jira ticket IDs to deployment status for quick lookup
   const deploymentMap = new Map<string, any>();
 
@@ -38,8 +40,21 @@ export async function GET(request: NextRequest) {
     const res = await jira.searchIssues(jql, 100, 0);
     issues = res.issues || [];
   } catch (err: any) {
-    console.error('Jira board fetch error (continuing with empty issues):', err?.message || err);
-    // Don't return 500 — let the board render with empty columns
+    console.error('Jira board fetch error:', err?.message || err);
+    const errMsg = err?.message || '';
+    const isAuthError = 
+      errMsg.includes('401') || 
+      errMsg.includes('403') || 
+      errMsg.includes('Unauthorized') || 
+      errMsg.includes('Forbidden') || 
+      errMsg.includes('refresh token') || 
+      errMsg.includes('invalid_grant') ||
+      errMsg.includes('Failed to parse Connect Session Auth Token');
+    
+    if (isAuthError) {
+      isConnected = false;
+      connectionError = errMsg;
+    }
   }
 
   // Fetch deployments linked to Jira tickets for the current user
@@ -121,8 +136,9 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    success: true,
-    isConnected: true,
+    success: isConnected,
+    isConnected,
+    connectionError,
     isMock,
     sprintName: 'Active Sprint',
     dateRange: 'Current',
