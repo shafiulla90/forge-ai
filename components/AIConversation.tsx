@@ -26,7 +26,8 @@ import {
   Boxes,
   Globe,
   Palette,
-  Check
+  Check,
+  Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -638,11 +639,11 @@ export function AIConversation() {
                             }
                           }
                           
-                          const fallbackUrl = `/api/chat/image?q=${encodeURIComponent(keywords || 'design')}`;
+                          const fallbackUrl = `/api/chat/image?q=${encodeURIComponent(keywords || 'design')}&fallback=true`;
                           const defaultFallback = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800';
 
                           return (
-                            <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
+                            <div className="relative group my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
                               <img 
                                 src={safeSrc} 
                                 alt={alt} 
@@ -650,17 +651,30 @@ export function AIConversation() {
                                 suppressHydrationWarning 
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
-                                  // If the primary URL failed and it is NOT already using our local API, fall back to the local API
-                                  if (target.src !== fallbackUrl && !target.src.includes('/api/chat/image')) {
+                                  if (target.src !== fallbackUrl && !target.src.includes('fallback=true')) {
                                     console.log('Image load failed. Falling back to local search:', fallbackUrl);
                                     target.src = fallbackUrl;
                                   } else if (target.src !== defaultFallback) {
-                                    // If local API also fails (or was the primary source and failed), fall back to default unsplash image
                                     console.log('Local search failed. Falling back to default:', defaultFallback);
                                     target.src = defaultFallback;
                                   }
                                 }}
                               />
+                              {/* Download Button Overlay */}
+                              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button
+                                  onClick={(e) => {
+                                    const imgElement = e.currentTarget.closest('.group')?.querySelector('img');
+                                    const currentSrc = imgElement?.src || safeSrc;
+                                    const downloadFilename = alt ? `${alt.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png` : 'ai-image.png';
+                                    window.location.href = `/api/chat/image/download?url=${encodeURIComponent(currentSrc)}&filename=${encodeURIComponent(downloadFilename)}`;
+                                  }}
+                                  className="flex items-center justify-center p-2 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 text-white hover:text-cyan-400 hover:scale-105 transition-all duration-150 shadow-md backdrop-blur-sm"
+                                  title="Download Image"
+                                >
+                                  <Download className="w-4.5 h-4.5" />
+                                </button>
+                              </div>
                             </div>
                           );
                         }

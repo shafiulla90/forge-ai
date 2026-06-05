@@ -51,12 +51,36 @@ async function queryWiki(searchTerm: string): Promise<string | null> {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('q');
+  const isFallback = searchParams.get('fallback') === 'true';
   const defaultFallback = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800';
   
   if (!query) {
     return NextResponse.redirect(defaultFallback);
   }
 
+  // If not a fallback request, redirect to Pollinations AI for high-quality generated creative images
+  if (!isFallback) {
+    try {
+      const cleanPrompt = query.trim();
+      if (cleanPrompt) {
+        const seed = Math.floor(Math.random() * 1000000);
+        // Use enhance=true to expand short prompts for premium creative thumbnails, and safe=true for safe content
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=768&nologo=true&private=true&enhance=true&safe=true&seed=${seed}`;
+        
+        return new NextResponse(null, {
+          status: 302,
+          headers: {
+            'Location': pollinationsUrl,
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          }
+        });
+      }
+    } catch (e) {
+      console.error('[Image Redirect] Pollinations redirect failed:', e);
+    }
+  }
+
+  // Fallback mode: query Wikimedia Commons for high-quality stock photo/graphic
   try {
     const cleanQuery = extractKeywords(query);
     if (cleanQuery) {
@@ -119,7 +143,7 @@ export async function GET(req: NextRequest) {
       }
     }
   } catch (e) {
-    console.error('[Image Redirect] Main search failed:', e);
+    console.error('[Image Redirect] Fallback search failed:', e);
   }
 
   // Final fallback to a high-quality abstract image on unsplash if search fails
