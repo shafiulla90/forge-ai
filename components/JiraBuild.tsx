@@ -45,7 +45,21 @@ export function JiraBuild() {
           orgs = await getAllOrgs(supabase);
         }
         setAllOrgs(orgs);
-        const activeOrg = await getActiveOrg(supabase) || (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
+        const activeOrg = await getActiveOrg(supabase) || 
+          orgs.find(o => {
+            const aliasLower = o.alias?.toLowerCase() || '';
+            const urlLower = o.instance_url?.toLowerCase() || '';
+            return !aliasLower.includes('qa') && 
+                   !aliasLower.includes('shafi') && 
+                   !aliasLower.includes('uat') && 
+                   !aliasLower.includes('prod') &&
+                   !urlLower.includes('qa') && 
+                   !urlLower.includes('shafi') && 
+                   !urlLower.includes('uat') &&
+                   !urlLower.includes('prod') &&
+                   o.org_type !== 'production';
+          }) || 
+          (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
         setOrg(activeOrg);
 
         // Fetch Jira Board columns in background
@@ -182,20 +196,31 @@ export function JiraBuild() {
   const ticketStatus = ticketDetails?.status || 'In Review';
   const deployUrlId = deployment?.id || deployId || 'mock-sfdc-109';
 
-  const devOrg = allOrgs[0] || org;
-  
   const qaOrg = allOrgs.find(o => 
-    o.id !== devOrg?.id && 
-    (o.alias?.toLowerCase().includes('qa') || 
-     o.instance_url?.toLowerCase().includes('qa') || 
-     o.alias?.toLowerCase().includes('shafi') || 
-     o.instance_url?.toLowerCase().includes('shafi'))
+    o.alias?.toLowerCase().includes('qa') || 
+    o.instance_url?.toLowerCase().includes('qa') || 
+    o.alias?.toLowerCase().includes('shafi') || 
+    o.instance_url?.toLowerCase().includes('shafi')
   );
 
   const uatOrg = allOrgs.find(o => 
-    o.id !== devOrg?.id && 
-    (o.alias?.toLowerCase().includes('uat') || o.instance_url?.toLowerCase().includes('uat'))
+    o.alias?.toLowerCase().includes('uat') || 
+    o.instance_url?.toLowerCase().includes('uat')
   );
+
+  const devOrg = allOrgs.find(o => {
+    const aliasLower = o.alias?.toLowerCase() || '';
+    const urlLower = o.instance_url?.toLowerCase() || '';
+    return !aliasLower.includes('qa') && 
+           !aliasLower.includes('shafi') && 
+           !aliasLower.includes('uat') && 
+           !aliasLower.includes('prod') &&
+           !urlLower.includes('qa') && 
+           !urlLower.includes('shafi') && 
+           !urlLower.includes('uat') &&
+           !urlLower.includes('prod') &&
+           o.org_type !== 'production';
+  }) || org;
 
   return (
     <div className="flex flex-1 overflow-hidden bg-[#0a1628] text-[#e2e8f0] font-sans">
@@ -206,7 +231,7 @@ export function JiraBuild() {
           <div className="text-[9px] text-[#4a7fa5] mt-0.5">Forge DevOps Pipeline</div>
         </div>
         <div className="m-2 p-3 bg-[#031b2e] rounded-[10px] border border-[#1e3a52] cursor-pointer">
-          <div className="text-[11px] font-semibold">{org?.alias || 'Acme Corp'}</div>
+          <div className="text-[11px] font-semibold">{devOrg?.alias || 'Acme Corp'}</div>
           <div className="text-[9px] text-[#4a7fa5] mt-0.5">Dev Sandbox · Connected</div>
           <div className="flex items-center gap-1 mt-1">
             <div className="w-[6px] h-[6px] rounded-full bg-[#22c55e]"></div>
@@ -446,7 +471,7 @@ export function JiraBuild() {
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#1e3a52]/50 mt-1">
                 <div>
                   <div className="text-[9px] font-bold text-[#4a7fa5] tracking-wider mb-1">TARGET ORG</div>
-                  <div className="text-[10.5px] text-[#e2e8f0]">{org?.alias || 'Forge AI Dev Org'} (Dev Sandbox)</div>
+                  <div className="text-[10.5px] text-[#e2e8f0]">{devOrg?.alias || 'Forge AI Dev Org'} (Dev Sandbox)</div>
                   <div className="text-[8px] text-[#4a7fa5] mt-0.5">Connect additional sandboxes to enable pipeline promotions</div>
                 </div>
                 <div>

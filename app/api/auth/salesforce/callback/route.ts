@@ -187,7 +187,13 @@ export async function GET(request: NextRequest) {
     console.log('[SF Callback] Successfully saved org to database:', orgData.id)
 
     // 5. Redirect to dashboard
-    const response = NextResponse.redirect(`${appUrl}/dashboard?orgId=${orgData.id}`)
+    const isPipelineSandbox = stage === 'qa' || stage === 'uat';
+    // If it's a pipeline sandbox connection, redirect to the dashboard without changing the active development orgId query param
+    const redirectUrl = isPipelineSandbox 
+      ? `${appUrl}/dashboard?view=p-s1` // redirect back to Jira+Build page
+      : `${appUrl}/dashboard?orgId=${orgData.id}`;
+
+    const response = NextResponse.redirect(redirectUrl)
 
     // Clear OAuth temporary cookies
     response.cookies.delete('sf_oauth_state')
@@ -198,24 +204,26 @@ export async function GET(request: NextRequest) {
     response.cookies.delete('sf_oauth_client_id')
     response.cookies.delete('sf_oauth_client_secret')
 
-    // Optional: Also set the sf_tokens cookie if the dashboard still relies on it!
-    const encryptedForClient = encrypt(JSON.stringify(tokenData))
-    response.cookies.set('sf_tokens', encryptedForClient, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    })
+    // Only set active session cookies if this is NOT a pipeline UAT/QA sandbox promotion connection
+    if (!isPipelineSandbox) {
+      const encryptedForClient = encrypt(JSON.stringify(tokenData))
+      response.cookies.set('sf_tokens', encryptedForClient, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7 // 1 week
+      })
 
-    // Set non-HttpOnly cookie for client components to read active instance url
-    response.cookies.set('sf_active_instance_url', tokens.instance_url, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    })
+      // Set non-HttpOnly cookie for client components to read active instance url
+      response.cookies.set('sf_active_instance_url', tokens.instance_url, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7 // 1 week
+      })
+    }
 
     return response
   } catch (err: any) {

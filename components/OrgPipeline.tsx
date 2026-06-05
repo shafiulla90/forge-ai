@@ -166,7 +166,21 @@ export function OrgPipeline() {
           orgs = await getAllOrgs(supabase);
         }
         setAllOrgs(orgs);
-        const activeOrg = await getActiveOrg(supabase) || (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
+        const activeOrg = await getActiveOrg(supabase) || 
+          orgs.find(o => {
+            const aliasLower = o.alias?.toLowerCase() || '';
+            const urlLower = o.instance_url?.toLowerCase() || '';
+            return !aliasLower.includes('qa') && 
+                   !aliasLower.includes('shafi') && 
+                   !aliasLower.includes('uat') && 
+                   !aliasLower.includes('prod') &&
+                   !urlLower.includes('qa') && 
+                   !urlLower.includes('shafi') && 
+                   !urlLower.includes('uat') &&
+                   !urlLower.includes('prod') &&
+                   o.org_type !== 'production';
+          }) || 
+          (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
         setOrg(activeOrg);
 
         let targetId = deployId;
@@ -273,25 +287,37 @@ export function OrgPipeline() {
   const deployUrlId = deployment?.id || deployId || 'mock-sfdc-109';
 
   // Identify connected environments dynamically from the database
-  const devOrg = allOrgs[0] || org;
-  
   const qaOrg = allOrgs.find(o => 
-    o.id !== devOrg?.id && 
-    (o.alias?.toLowerCase().includes('qa') || 
-     o.instance_url?.toLowerCase().includes('qa') || 
-     o.alias?.toLowerCase().includes('shafi') || 
-     o.instance_url?.toLowerCase().includes('shafi'))
+    o.alias?.toLowerCase().includes('qa') || 
+    o.instance_url?.toLowerCase().includes('qa') || 
+    o.alias?.toLowerCase().includes('shafi') || 
+    o.instance_url?.toLowerCase().includes('shafi')
   );
 
   const uatOrg = allOrgs.find(o => 
-    o.id !== devOrg?.id && 
-    (o.alias?.toLowerCase().includes('uat') || o.instance_url?.toLowerCase().includes('uat'))
+    o.alias?.toLowerCase().includes('uat') || 
+    o.instance_url?.toLowerCase().includes('uat')
   );
 
   const prodOrg = allOrgs.find(o => 
-    o.id !== devOrg?.id && 
-    (o.org_type === 'production' || o.alias?.toLowerCase().includes('prod') || o.alias?.toLowerCase().includes('production'))
+    o.org_type === 'production' || 
+    o.alias?.toLowerCase().includes('prod') || 
+    o.alias?.toLowerCase().includes('production')
   );
+
+  const devOrg = allOrgs.find(o => {
+    const aliasLower = o.alias?.toLowerCase() || '';
+    const urlLower = o.instance_url?.toLowerCase() || '';
+    return !aliasLower.includes('qa') && 
+           !aliasLower.includes('shafi') && 
+           !aliasLower.includes('uat') && 
+           !aliasLower.includes('prod') &&
+           !urlLower.includes('qa') && 
+           !urlLower.includes('shafi') && 
+           !urlLower.includes('uat') &&
+           !urlLower.includes('prod') &&
+           o.org_type !== 'production';
+  }) || org;
 
   return (
     <div className="flex flex-1 overflow-hidden bg-[#0a1628] text-[#e2e8f0] font-sans">
@@ -471,7 +497,7 @@ export function OrgPipeline() {
               <span className="text-[12px] font-bold uppercase tracking-wider">How to deploy to QA or UAT Sandbox</span>
             </div>
             <p className="text-[11px] text-[#e2e8f0]/80 leading-relaxed">
-              Currently, you have only **one** Salesforce org connected (<span className="text-[#00a1e0] font-semibold">{org?.alias || 'Forge AI Dev Org'}</span>), which is assigned as your **Dev Sandbox**.
+              Currently, you have only **one** Salesforce org connected (<span className="text-[#00a1e0] font-semibold">{devOrg?.alias || 'Forge AI Dev Org'}</span>), which is assigned as your **Dev Sandbox**.
               To enable deployments to QA, UAT, or Production, please go to the <Link href="/dashboard?view=connect" className="text-[#00a1e0] underline font-bold">Connect Org</Link> screen and link your other Salesforce environments.
             </p>
           </div>
@@ -488,7 +514,7 @@ export function OrgPipeline() {
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></div>
                     <span className="text-[12px] font-bold text-[#e2e8f0]">Dev Sandbox</span>
-                    <span className="text-[9.5px] text-[#4a7fa5] font-mono">{org?.instance_url || 'acme-dev.my.salesforce.com'}</span>
+                    <span className="text-[9.5px] text-[#4a7fa5] font-mono">{devOrg?.instance_url || 'acme-dev.my.salesforce.com'}</span>
                   </div>
                   <span className="text-[8px] px-2 py-0.5 rounded bg-[#22c55e]/20 text-[#22c55e] font-bold uppercase tracking-wider">✓ Deployed · Approved</span>
                 </div>
