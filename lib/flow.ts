@@ -28,6 +28,12 @@ export async function normalizeFlowXml(xml: string): Promise<string> {
     if (!xml || xml.trim() === '') {
       return xml;
     }
+    // Auto-heal polymorphic Owner fields to avoid field integrity errors in Salesforce
+    xml = xml.replace(/\$Record\.Owner\.Email/g, '$Record.Owner:User.Email');
+    xml = xml.replace(/\$Record\.Owner\.Name/g, '$Record.Owner:User.Name');
+    xml = xml.replace(/\$Record\.Owner\.FirstName/g, '$Record.Owner:User.FirstName');
+    xml = xml.replace(/\$Record\.Owner\.LastName/g, '$Record.Owner:User.LastName');
+
     const parsed = await parseStringPromise(xml);
     if (parsed && parsed.Flow) {
       const visualKeys = [

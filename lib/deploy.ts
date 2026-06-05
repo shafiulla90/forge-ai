@@ -719,7 +719,7 @@ export async function executeDeployment(deploymentId: string, targetOrgId?: stri
           throw new Error(errMsg);
         }
 
-        const isFileBased = ['ApexClass', 'ApexTrigger', 'ApexPage', 'LightningComponentBundle', 'AuraDefinitionBundle', 'Flow'].includes(compiledType);
+        const isFileBased = ['ApexClass', 'ApexTrigger', 'ApexPage', 'LightningComponentBundle', 'AuraDefinitionBundle', 'Flow', 'EmailTemplate'].includes(compiledType);
 
         if (isFileBased) {
           if (compiledAction === 'create' || compiledAction === 'modify') {

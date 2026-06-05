@@ -68,7 +68,27 @@ export async function GET(req: NextRequest) {
         const stashedSummary = (stashedPlan?.summary || '').toLowerCase();
         const liveSummary = (summary || '').toLowerCase();
 
+        const steps = stashedPlan?.steps || [];
+        const hasStubSteps = Array.isArray(steps) && (
+          steps.length === 0 ||
+          steps.some((s: any) => {
+            if (!s.type) return true;
+            const t = s.type;
+            if (t === 'Flow') {
+              return !s.metadata || !s.metadata.xml;
+            }
+            if (t === 'ApexClass' || t === 'ApexTrigger') {
+              return !s.metadata || !s.metadata.body;
+            }
+            if (t === 'CustomField' || t === 'CustomObject' || t === 'ValidationRule' || t === 'CustomTab' || t === 'EmailTemplate') {
+              return !s.metadata || Object.keys(s.metadata).length === 0;
+            }
+            return false;
+          })
+        );
+
         const isMismatched = 
+          hasStubSteps ||
           (stashedSummary.includes('partner referral') && !liveSummary.includes('partner referral')) ||
           (stashedSummary.includes('escalate') && !liveSummary.includes('escalate')) ||
           (stashedSummary.includes('account status') && !liveSummary.includes('account status')) ||
@@ -868,79 +888,6 @@ export async function GET(req: NextRequest) {
             'Flow triggers successfully on Contact create/update',
             'Contact_Type__c updates to "Personal" if Email contains "@gmail.com"',
             'Contact_Type__c updates to "Business" if Email does not contain "@gmail.com"',
-            'Flow is active and validated in Salesforce Sandbox'
-          ]
-        };
-      } else if (
-        lowerSummary.includes('reminder flow') ||
-        lowerSummary.includes('close date')
-      ) {
-        plan = {
-          summary: 'Scheduled flow to send reminders for Opportunities approaching close date.',
-          riskLevel: 'Low',
-          steps: [
-            { 
-              num: 1, 
-              title: 'Create Scheduled Flow: Opportunity_Close_Date_Reminder', 
-              detail: 'Object: Opportunity · Trigger: Scheduled (Daily) · Filter: IsClosed = False && CloseDate = TODAY() + 7', 
-              api: 'Metadata API · Flow' 
-            },
-            { 
-              num: 2, 
-              title: 'Add Email Alert Action', 
-              detail: 'Template: "Opportunity Close Date Reminder Template" · Recipient: OwnerId', 
-              api: 'Metadata API · Flow' 
-            },
-            { 
-              num: 3, 
-              title: 'Create Reminder Task', 
-              detail: 'Subject: "Opportunity closing in 7 days" · Status: "Not Started" · Priority: "Normal" · ActivityDate: CloseDate', 
-              api: 'Metadata API · Flow' 
-            }
-          ],
-          acceptanceCriteria: [
-            'Scheduled flow runs daily for Opportunities closing within 7 days',
-            'Email alert is sent to Opportunity Owner',
-            'Reminder Task is created and linked to the Opportunity'
-          ]
-        };
-      } else if (
-        lowerSummary.includes('email notification') ||
-        lowerSummary.includes('case status changes') ||
-        suffix === '18'
-      ) {
-        plan = {
-          summary: 'Configure email notifications for Case status changes.',
-          riskLevel: 'Low',
-          steps: [
-            { 
-              num: 1, 
-              title: 'Create Email Template: Case_Status_Update_Notification', 
-              detail: 'Type: HTML · Merge Fields: CaseNumber, Status, Subject · Folder: Support Templates', 
-              api: 'Metadata API · EmailTemplate' 
-            },
-            { 
-              num: 2, 
-              title: 'Create Record-Triggered Flow: Case_Status_Change_Notification', 
-              detail: 'Object: Case · Trigger: Updated · Optimize for: Actions and Related Records (After-Save)', 
-              api: 'Metadata API · Flow' 
-            },
-            { 
-              num: 3, 
-              title: 'Add Decision Node: Check Status Change', 
-              detail: 'Condition: $Record.Status IsChanged True -> Proceed · Default: End Flow', 
-              api: 'Metadata API · Flow' 
-            },
-            { 
-              num: 4, 
-              title: 'Add Action Node: Send Case Email Alert', 
-              detail: 'Email Alert API Name: Send_Case_Status_Email · Recipient: ContactId / OwnerId', 
-              api: 'Metadata API · Flow' 
-            }
-          ],
-          acceptanceCriteria: [
-            'Email template contains correct merge fields and branding',
-            'Email is successfully sent to recipient upon Case status change',
             'Flow is active and validated in Salesforce Sandbox'
           ]
         };

@@ -31,8 +31,8 @@ The return value must be a single, valid JSON object matching the following stru
     {
       "num": 1,
       "title": "Title of the step (e.g. Create Picklist Field: Asset_Status__c on Employee_Asset__c)",
-      "type": "CustomField" | "CustomObject" | "Flow" | "CustomTab" | "ApexClass" | "ApexTrigger" | "ValidationRule",
-      "fullName": "API Name of the component (e.g. Employee_Asset__c.Asset_Status__c, or Employee_Asset_Return_Process)",
+      "type": "CustomField" | "CustomObject" | "Flow" | "CustomTab" | "ApexClass" | "ApexTrigger" | "ValidationRule" | "EmailTemplate",
+      "fullName": "API Name of the component (e.g. Employee_Asset__c.Asset_Status__c, or Employee_Asset_Return_Process, or unfiled$public/MyTemplate)",
       "detail": "Description of the step",
       "api": "Metadata API · CustomField" (or other Metadata API type),
       "action": "create" | "modify" | "delete",
@@ -50,6 +50,8 @@ The return value must be a single, valid JSON object matching the following stru
         // { "fullName": "MyTrigger", "body": "trigger MyTrigger on Account (after insert) { ... }" }
         // For CustomTab:
         // { "fullName": "Employee_Asset__c", "customObject": true, "motif": "Custom19: People" }
+        // For EmailTemplate:
+        // { "fullName": "unfiled$public/MyTemplate", "type": "html", "subject": "Hello", "content": "Body content", "name": "MyTemplate" }
       }
     }
   ],

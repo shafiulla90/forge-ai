@@ -200,6 +200,55 @@ export async function buildMetadataZip(type: string, name: string, metadata: any
 </Package>`;
     zip.file('package.xml', packageXml);
   }
+  else if (type === 'EmailTemplate') {
+    const parts = name.split('/');
+    let folder = 'unfiled$public';
+    let templateName = name;
+    if (parts.length > 1) {
+      folder = parts[0];
+      templateName = parts[1];
+    } else {
+      name = `unfiled$public/${name}`;
+    }
+
+    const content = metadata.content || metadata.body || '';
+    zip.file(`email/${folder}/${templateName}.email`, content);
+
+    let emailType = metadata.type || 'text';
+    if (emailType === 'html') {
+      emailType = 'custom';
+    }
+    const emailSubject = metadata.subject || 'Notification';
+    const emailName = metadata.name || templateName.replace(/_/g, ' ');
+    let emailStyle = metadata.style || 'freeForm';
+    if (emailStyle === 'none') {
+      emailStyle = 'freeForm';
+    }
+    const isAvailable = metadata.available !== undefined ? metadata.available : true;
+    const encodingKey = metadata.encodingKey || metadata.encoding || 'UTF-8';
+
+    const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <available>${isAvailable}</available>
+    <encodingKey>${encodingKey}</encodingKey>
+    <name>${emailName}</name>
+    <style>${emailStyle}</style>
+    <subject>${emailSubject}</subject>
+    <type>${emailType}</type>
+</EmailTemplate>`;
+    zip.file(`email/${folder}/${templateName}.email-meta.xml`, metaXml);
+
+    const packageXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>${name}</members>
+        <name>EmailTemplate</name>
+    </types>
+    <version>60.0</version>
+</Package>`;
+    zip.file('package.xml', packageXml);
+  }
   
   return await zip.generateAsync({ type: 'nodebuffer' });
 }
