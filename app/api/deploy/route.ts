@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Trigger Execution (Async)
-  executeDeployment(activeDeploymentId).catch(err => {
+  executeDeployment(activeDeploymentId, targetOrgId).catch(err => {
     console.error('[API Deploy] Background execution error:', err);
   });
 
