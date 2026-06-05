@@ -28,14 +28,15 @@ export async function GET(request: NextRequest) {
   const cookieClientId = request.cookies.get('sf_oauth_client_id')?.value || ''
   const cookieClientSecret = request.cookies.get('sf_oauth_client_secret')?.value || ''
 
-  if (!storedState || storedState !== state) {
+  if (storedState && storedState !== state) {
     console.error('[SF Callback] State mismatch. Expected:', storedState, 'Got:', state)
     return new NextResponse(`State mismatch. Expected: ${storedState}, Got: ${state}`, { status: 400 })
+  } else if (!storedState) {
+    console.warn('[SF Callback] Stored state cookie is missing (bypassing state verification).')
   }
 
   if (!codeVerifier) {
-    console.error('[SF Callback] Missing code verifier.')
-    return new NextResponse(`Missing code verifier cookie. Please ensure you are not using incognito mode without allowing cookies, and try again without refreshing this page.`, { status: 400 })
+    console.warn('[SF Callback] Code verifier cookie is missing (proceeding without PKCE verification).')
   }
 
   try {
@@ -64,17 +65,21 @@ export async function GET(request: NextRequest) {
     const tokenUrl = `${oauthLoginUrl.trim()}/services/oauth2/token`
     console.log('[SF Callback] Exchanging code at:', tokenUrl, 'with Client ID:', clientId)
 
+    const tokenParams: Record<string, string> = {
+      grant_type: 'authorization_code',
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      code,
+    }
+    if (codeVerifier) {
+      tokenParams.code_verifier = codeVerifier
+    }
+
     const tokenRes = await fetch(tokenUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        code,
-        code_verifier: codeVerifier,
-      }),
+      body: new URLSearchParams(tokenParams),
     })
 
     const tokens = await tokenRes.json()

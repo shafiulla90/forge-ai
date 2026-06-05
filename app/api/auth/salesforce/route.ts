@@ -92,9 +92,9 @@ export async function GET(request: Request) {
   // Store temporary OAuth state in cookies (server-side only, never exposed to user)
   const cookieOpts = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     maxAge: 60 * 10, // 10 minutes
-    sameSite: 'lax' as const,
+    sameSite: 'none' as const,
     path: '/',
   };
 

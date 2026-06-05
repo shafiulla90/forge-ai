@@ -28,7 +28,7 @@ export function JiraBoard() {
     }
   }
 
-  async function fetchBoardData() {
+  async function fetchBoardData(isSilent = false) {
     try {
       // Forward all relevant URL params (importTicket, connected, mock) to the board API
       const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
@@ -43,19 +43,41 @@ export function JiraBoard() {
         setIsConnected(data.isConnected ?? false);
         if (data.sprintName) setSprintName(data.sprintName);
         if (data.dateRange) setDateRange(data.dateRange);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('forge_jira_board', JSON.stringify(data));
+        }
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message);
+      if (!isSilent) setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchBoardData();
+    // Attempt to load from cache first for instant render
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('forge_jira_board');
+      if (cached) {
+        try {
+          const data = JSON.parse(cached);
+          if (data.columns) {
+            setColumns(data.columns);
+            setIsConnected(data.isConnected ?? false);
+            if (data.sprintName) setSprintName(data.sprintName);
+            if (data.dateRange) setDateRange(data.dateRange);
+            setLoading(false);
+          }
+        } catch (e) {}
+      }
+    }
+
+    const hasCache = typeof window !== 'undefined' && sessionStorage.getItem('forge_jira_board');
+    fetchBoardData(!!hasCache);
+
     const interval = setInterval(() => {
-      fetchBoardData();
+      fetchBoardData(true);
     }, 30000); // refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
@@ -116,7 +138,7 @@ export function JiraBoard() {
         
         <div className="ml-auto flex items-center gap-3">
           <button 
-            onClick={fetchBoardData}
+            onClick={() => fetchBoardData(false)}
             className="flex items-center gap-1.5 bg-[#021427] border border-[#1e3a52] hover:bg-[#031b2e] px-3 py-1 text-[10.5px] text-[#7cc4e4] rounded-lg transition-all"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>

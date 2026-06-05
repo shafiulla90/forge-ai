@@ -31,7 +31,7 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { getActiveOrg } from '@/lib/supabase-helpers';
+import { getActiveOrg, getCurrentUser } from '@/lib/supabase-helpers';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -123,7 +123,7 @@ export function AIConversation() {
         setOrg(activeOrg);
         
         // Load only the conversations belonging to this specific user and active org!
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = await getCurrentUser(supabase);
         if (user) {
           const { data: convos } = await supabase
             .from('conversations')
@@ -228,7 +228,7 @@ export function AIConversation() {
       // Client-Side Conversation Creation
       if (!convoId) {
         const { data: newConvo } = await supabase.from('conversations').insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: (await getCurrentUser(supabase))?.id,
           org_id: org.id,
           title: text.substring(0, 50) + (text.length > 50 ? '...' : '')
         }).select().single();

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { getActiveOrg } from '@/lib/supabase-helpers';
+import { getActiveOrg, getCurrentUser } from '@/lib/supabase-helpers';
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -49,7 +49,7 @@ export function ReviewPlan() {
       }
       setOrg(activeOrg);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUser(supabase);
       if (!user) {
         setLoading(false);
         return;
@@ -222,7 +222,7 @@ export function ReviewPlan() {
     setLoading(true);
     const targetOrg = org || { id: '00DdN000000abcde' };
     
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser(supabase);
     
     const planObj = planData?.plan || planData;
     const finalPlanItems = planObj?.items || planObj?.steps || [];

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
-import { getActiveOrg } from '@/lib/supabase-helpers';
+import { getActiveOrg, getCurrentUser, getAllOrgs } from '@/lib/supabase-helpers';
 
 export function JiraBuild() {
   const searchParams = useSearchParams();
@@ -24,29 +24,44 @@ export function JiraBuild() {
   useEffect(() => {
     async function loadData() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Load Jira Board columns from cache for instant sidebar rendering
+        if (typeof window !== 'undefined') {
+          const cachedBoard = sessionStorage.getItem('forge_jira_board');
+          if (cachedBoard) {
+            try {
+              const boardData = JSON.parse(cachedBoard);
+              if (boardData.columns) {
+                setTodoTickets(boardData.columns.todo || []);
+                setReviewTickets(boardData.columns.review || []);
+              }
+            } catch (e) {}
+          }
+        }
+
+        const user = await getCurrentUser(supabase);
         let orgs: any[] = [];
         if (user) {
-          const { data } = await supabase.from('orgs').select('*').eq('user_id', user.id);
-          orgs = data || [];
+          orgs = await getAllOrgs(supabase);
         }
         setAllOrgs(orgs);
         const activeOrg = await getActiveOrg(supabase) || (orgs.length > 0 ? orgs[0] : { alias: 'Acme Corp', instance_url: '' });
         setOrg(activeOrg);
 
-        // Fetch Jira Board columns for the sidebar
-        try {
-          const boardRes = await fetch('/api/jira/board');
+        // Fetch Jira Board columns in background
+        fetch('/api/jira/board').then(async (boardRes) => {
           if (boardRes.ok) {
             const boardData = await boardRes.json();
             if (boardData.success && boardData.columns) {
               setTodoTickets(boardData.columns.todo || []);
               setReviewTickets(boardData.columns.review || []);
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('forge_jira_board', JSON.stringify(boardData));
+              }
             }
           }
-        } catch (boardErr) {
+        }).catch((boardErr) => {
           console.error('Failed to load board data in sidebar:', boardErr);
-        }
+        });
 
         let targetId = deployId;
         if (!targetId) {

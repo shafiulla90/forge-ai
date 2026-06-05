@@ -19,12 +19,15 @@ export async function GET(request: NextRequest) {
   const isMock = jira.isMock;
 
   // Determine JQL for fetching issues
-  // For live connections: use stored project key if available, else fetch all accessible issues
-  // For mock: use mock project key
+  // For live connections: search by project OR user's assigned/reported tickets.
+  // If projectKey is default 'SFDC', we do not restrict solely to it (since it may not exist).
   const projectKey = connection.project_key;
-  const jql = projectKey
-    ? `project = "${projectKey}" ORDER BY created DESC`
-    : `ORDER BY created DESC`;
+  let jql = '';
+  if (projectKey && projectKey !== 'SFDC') {
+    jql = `(project = "${projectKey}" OR assignee = currentUser() OR reporter = currentUser()) ORDER BY created DESC`;
+  } else {
+    jql = `(assignee = currentUser() OR reporter = currentUser()) ORDER BY created DESC`;
+  }
 
   let issues: any[] = [];
   // Map Jira ticket IDs to deployment status for quick lookup
