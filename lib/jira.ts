@@ -11,6 +11,8 @@ export interface JiraConnectionData {
   is_mock?: boolean;
   import_ticket?: string;
   is_connected?: boolean;
+  auth_method?: string;
+  email?: string;
 }
 
 /**
@@ -35,10 +37,14 @@ export async function getJiraConnection(userId: string, supabaseClient?: any): P
       const decryptedRefresh = decrypt(connection.refresh_token);
       let importTicket = '';
       let realRefreshToken = decryptedRefresh;
+      let authMethod = 'oauth';
+      let email = '';
       try {
         const parsed = JSON.parse(decryptedRefresh);
         if (parsed.importTicket) importTicket = parsed.importTicket;
         if (parsed.refresh_token) realRefreshToken = parsed.refresh_token;
+        if (parsed.auth_method) authMethod = parsed.auth_method;
+        if (parsed.email) email = parsed.email;
       } catch (e) {}
 
       return {
@@ -50,7 +56,9 @@ export async function getJiraConnection(userId: string, supabaseClient?: any): P
         refresh_token: realRefreshToken,
         is_mock: decryptedAccess.startsWith('mock_') || connection.site_url.includes('mock'),
         import_ticket: importTicket,
-        is_connected: true
+        is_connected: true,
+        auth_method: authMethod,
+        email: email
       };
     } catch (e) {
       console.error('[Jira Connect] Failed to decrypt tokens:', e);
@@ -382,9 +390,16 @@ export async function createJiraClient(userId: string, supabaseClient?: any) {
 
   // Live Jira OAuth client
   const siteUrl = connection.site_url.replace(/\/$/, '');
+  const isBasic = connection.auth_method === 'basic';
+  const email = connection.email || '';
+  const apiToken = connection.access_token;
 
   // Define the refresh function
   async function performRefresh() {
+    if (isBasic) {
+      console.log('[Jira API] Basic Auth connection. Refresh is not supported or needed.');
+      return;
+    }
     console.log('[Jira API] Access token expired or invalid, performing token refresh...');
     const clientId = process.env.JIRA_CLIENT_ID;
     const clientSecret = process.env.JIRA_CLIENT_SECRET;
@@ -490,6 +505,7 @@ export async function createJiraClient(userId: string, supabaseClient?: any) {
   let cloudId = '';
 
   async function resolveCloudId() {
+    if (isBasic) return;
     try {
       const accessibleUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
       let profileRes = await fetch(accessibleUrl, {
@@ -525,13 +541,17 @@ export async function createJiraClient(userId: string, supabaseClient?: any) {
 
   // Custom fetch function that wraps and handles auto-refresh on 401
   async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+    const authHeader = isBasic
+      ? `Basic ${Buffer.from(`${email}:${apiToken}`).toString('base64')}`
+      : `Bearer ${connection.access_token}`;
+
     const headers = {
       ...(options.headers || {}),
-      'Authorization': `Bearer ${connection.access_token}`
+      'Authorization': authHeader
     };
 
     let res = await fetch(url, { ...options, headers });
-    if (res.status === 401) {
+    if (res.status === 401 && !isBasic) {
       console.log('[Jira API] Detected 401 Unauthorized, refreshing token...');
       try {
         await performRefresh();

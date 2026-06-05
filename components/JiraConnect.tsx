@@ -15,6 +15,11 @@ export function JiraConnect() {
   const [mounted, setMounted] = useState(false);
   const [connection, setConnection] = useState<any>(null);
   const [importTicket, setImportTicket] = useState('');
+  const [authMode, setAuthMode] = useState<'oauth' | 'basic'>('basic');
+  const [email, setEmail] = useState('');
+  const [apiToken, setApiToken] = useState('');
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
   // Helper to extract a ticket key from a Jira URL (e.g., /browse/PROJ-123)
   const extractTicketFromUrl = (urlStr: string): string => {
     try {
@@ -52,22 +57,16 @@ export function JiraConnect() {
   useEffect(() => {
     async function loadJiraConfig() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        let conn = null;
-        if (user) {
-          const { data } = await supabase
-            .from('jira_connections')
-            .select('*')
-            .eq('user_id', user.id)
-            .limit(1)
-            .maybeSingle();
-          conn = data;
-        }
-
-        if (conn) {
-          setConnection(conn);
-          if (conn.site_url) setSiteUrl(conn.site_url);
-          if (conn.project_key) setProjectKey(conn.project_key);
+        const res = await fetch('/api/jira/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.isConnected) {
+            setConnection(data);
+            if (data.siteUrl) setSiteUrl(data.siteUrl);
+            if (data.projectKey) setProjectKey(data.projectKey);
+            if (data.authMethod) setAuthMode(data.authMethod);
+            if (data.email) setEmail(data.email);
+          }
         }
       } catch (err) {
         console.warn('Failed to load Jira connection:', err);
@@ -85,19 +84,20 @@ export function JiraConnect() {
         setShowSuccess(true);
         // Re-fetch connection info to update UI
         (async () => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data } = await supabase
-              .from('jira_connections')
-              .select('*')
-              .eq('user_id', user.id)
-              .limit(1)
-              .maybeSingle();
-            if (data) {
-              setConnection(data);
-              if (data.site_url) setSiteUrl(data.site_url);
-              if (data.project_key) setProjectKey(data.project_key);
+          try {
+            const res = await fetch('/api/jira/status');
+            if (res.ok) {
+              const data = await res.json();
+              if (data.isConnected) {
+                setConnection(data);
+                if (data.siteUrl) setSiteUrl(data.siteUrl);
+                if (data.projectKey) setProjectKey(data.projectKey);
+                if (data.authMethod) setAuthMode(data.authMethod);
+                if (data.email) setEmail(data.email);
+              }
             }
+          } catch (err) {
+            console.warn('Failed to re-fetch Jira status:', err);
           }
         })();
       }
@@ -186,7 +186,7 @@ export function JiraConnect() {
         <div className="w-full bg-[#0d2137] rounded-xl border border-[#1e3a52] overflow-hidden shadow-xl">
           <div className="bg-[#0052CC] px-3.5 py-1.5 border-b border-[#1e3a52]/40 flex flex-col select-none">
             <div className="text-[11.5px] font-bold text-white tracking-tight">Connect Jira workspace</div>
-            <div className="text-[9px] text-[#B3D4FF] font-medium">OAuth 2.0 · Atlassian Cloud Link</div>
+            <div className="text-[9px] text-[#B3D4FF] font-medium">Link Atlassian Cloud Workspace</div>
           </div>
 
           <div className="p-3 flex flex-col gap-2.5">
@@ -194,6 +194,26 @@ export function JiraConnect() {
             {!connection ? (
               // No connection yet – show the form
               <>
+                {/* Auth Mode Tabs */}
+                <div className="flex bg-[#021427] p-1 rounded-lg border border-[#1e3a52]/60 mb-1">
+                  <button
+                    onClick={() => { setAuthMode('basic'); setConnectError(null); }}
+                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-md transition-all cursor-pointer ${
+                      authMode === 'basic' ? 'bg-[#15803D] text-white' : 'text-[#4a7fa5] hover:text-white'
+                    }`}
+                  >
+                    API Token (Keyless)
+                  </button>
+                  <button
+                    onClick={() => { setAuthMode('oauth'); setConnectError(null); }}
+                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-md transition-all cursor-pointer ${
+                      authMode === 'oauth' ? 'bg-[#0052CC] text-white' : 'text-[#4a7fa5] hover:text-white'
+                    }`}
+                  >
+                    OAuth 2.0 Consent
+                  </button>
+                </div>
+
                 <div className="flex flex-col">
                   <label className="text-[8.5px] font-bold text-[#4a7fa5] uppercase tracking-wider mb-0.5 block select-none">Jira Site URL</label>
                   <input
@@ -228,6 +248,42 @@ export function JiraConnect() {
                     }}
                   />
                 </div>
+
+                {authMode === 'basic' && (
+                  <>
+                    <div className="flex flex-col">
+                      <label className="text-[8.5px] font-bold text-[#4a7fa5] uppercase tracking-wider mb-0.5 block select-none">Jira Account Email</label>
+                      <input
+                        className="w-full bg-[#021427] border border-[#1e3a52] rounded-lg px-2.5 py-1.5 text-[11px] text-[#e2e8f0] outline-none focus:border-[#15803D] transition-all placeholder:text-[#1a3050]"
+                        placeholder="e.g. your-jira-email@example.com"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[8.5px] font-bold text-[#4a7fa5] uppercase tracking-wider mb-0.5 block select-none flex items-center justify-between">
+                        <span>Jira API Token</span>
+                        <a 
+                          href="https://id.atlassian.com/manage-profile/security/api-tokens" 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-[#00a1e0] hover:underline normal-case font-bold tracking-wide"
+                        >
+                          Generate Token ↗
+                        </a>
+                      </label>
+                      <input
+                        className="w-full bg-[#021427] border border-[#1e3a52] rounded-lg px-2.5 py-1.5 text-[11px] text-[#e2e8f0] outline-none focus:border-[#15803D] transition-all placeholder:text-[#1a3050]"
+                        placeholder="Paste ATATT... API token here"
+                        type="password"
+                        value={apiToken}
+                        onChange={(e) => setApiToken(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="flex flex-col">
                   <label className="text-[8.5px] font-bold text-[#4a7fa5] uppercase tracking-wider mb-0.5 block select-none">Default Project</label>
                   <input
@@ -268,23 +324,78 @@ export function JiraConnect() {
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#4a7fa5]"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg></div>
                   </div>
                 </div>
+
+                {connectError && (
+                  <div className="text-[10px] text-red-400 font-bold bg-red-950/20 border border-red-500/20 rounded-lg p-2.5 leading-normal">
+                    ⚠️ {connectError}
+                  </div>
+                )}
+
                 <div className="mt-1">
-                  <button
-                    onClick={() => {
-                      const finalImportTicket = importTicket || extractTicketFromUrl(siteUrl);
-                      const connectApiUrl = `/api/jira/connect?siteUrl=${encodeURIComponent(siteUrl)}&projectKey=${encodeURIComponent(projectKey)}&ticketType=${encodeURIComponent(ticketType)}&workflow=${encodeURIComponent(workflow)}&importTicket=${encodeURIComponent(finalImportTicket)}`;
-                      // Open OAuth flow in a centered popup to avoid full page reload
-                      const width = 600;
-                      const height = 700;
-                      const left = window.screenX + (window.innerWidth - width) / 2;
-                      const top = window.screenY + (window.innerHeight - height) / 2;
-                      window.open(connectApiUrl, 'jira-connect', `width=${width},height=${height},left=${left},top=${top}`);
-                    }}
-                    className="w-full bg-[#0052CC] hover:bg-[#0047b3] text-white font-bold py-2.5 rounded-lg text-[11.5px] flex items-center justify-center gap-1.5 transition-all hover:scale-[1.01] active:scale-[0.99] uppercase tracking-wider shadow-lg shadow-[#0052CC]/15"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    Connect Jira via Atlassian OAuth
-                  </button>
+                  {authMode === 'oauth' ? (
+                    <button
+                      onClick={() => {
+                        const finalImportTicket = importTicket || extractTicketFromUrl(siteUrl);
+                        const connectApiUrl = `/api/jira/connect?siteUrl=${encodeURIComponent(siteUrl)}&projectKey=${encodeURIComponent(projectKey)}&ticketType=${encodeURIComponent(ticketType)}&workflow=${encodeURIComponent(workflow)}&importTicket=${encodeURIComponent(finalImportTicket)}`;
+                        // Open OAuth flow in a centered popup to avoid full page reload
+                        const width = 600;
+                        const height = 700;
+                        const left = window.screenX + (window.innerWidth - width) / 2;
+                        const top = window.screenY + (window.innerHeight - height) / 2;
+                        window.open(connectApiUrl, 'jira-connect', `width=${width},height=${height},left=${left},top=${top}`);
+                      }}
+                      className="w-full bg-[#0052CC] hover:bg-[#0047b3] text-white font-bold py-2.5 rounded-lg text-[11.5px] flex items-center justify-center gap-1.5 transition-all hover:scale-[1.01] active:scale-[0.99] uppercase tracking-wider shadow-lg shadow-[#0052CC]/15 cursor-pointer"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      Connect Jira via Atlassian OAuth
+                    </button>
+                  ) : (
+                    <button
+                      disabled={connecting}
+                      onClick={async () => {
+                        setConnecting(true);
+                        setConnectError(null);
+                        try {
+                          const res = await fetch('/api/jira/connect/basic', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              siteUrl,
+                              email,
+                              apiToken,
+                              projectKey,
+                              ticketType,
+                              workflow
+                            })
+                          });
+                          const data = await res.json();
+                          if (res.ok && data.success) {
+                            setShowSuccess(true);
+                            setConnection(data);
+                          } else {
+                            setConnectError(data.error || 'Failed to authenticate. Please verify your Email and API Token.');
+                          }
+                        } catch (err: any) {
+                          setConnectError(err.message || 'An unexpected connection error occurred.');
+                        } finally {
+                          setConnecting(false);
+                        }
+                      }}
+                      className="w-full bg-[#15803D] hover:bg-[#166534] disabled:bg-[#15803D]/40 text-white font-bold py-2.5 rounded-lg text-[11.5px] flex items-center justify-center gap-1.5 transition-all hover:scale-[1.01] active:scale-[0.99] uppercase tracking-wider shadow-lg shadow-[#15803D]/15 cursor-pointer"
+                    >
+                      {connecting ? (
+                        <>
+                          <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                          Verifying credentials...
+                        </>
+                      ) : (
+                        <>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                          Connect Jira via API Token
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </>
             ) : showSuccess ? (
@@ -307,8 +418,9 @@ export function JiraConnect() {
                   </div>
                 </div>
                 <div className="text-[9.5px] text-[#86b595] leading-relaxed">
-                  Workspace: <span className="text-white font-mono">{connection.site_url}</span><br />
-                  Default Project Key: <span className="text-white font-mono">{connection.project_key}</span>
+                  Workspace: <span className="text-white font-mono">{connection.site_url || connection.siteUrl}</span><br />
+                  Default Project Key: <span className="text-white font-mono">{connection.project_key || connection.projectKey}</span><br />
+                  Connection Type: <span className="text-[#a78bfa] font-bold uppercase tracking-wider">{connection.authMethod === 'basic' || connection.auth_method === 'basic' ? 'API Token (Keyless)' : 'OAuth 2.0'}</span>
                 </div>
               </div>
             )}
