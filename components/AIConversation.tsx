@@ -58,7 +58,7 @@ export function AIConversation() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // High fidelity functionality states
-  const [attachments, setAttachments] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<any[]>([]);
   const [screenshotAttached, setScreenshotAttached] = useState(false);
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const [selectedSkills, setSelectedSkills] = useState<string[]>(['Apex Generator']);
@@ -100,18 +100,88 @@ export function AIConversation() {
     setShowMenu(false);
     setTimeout(() => {
       setFlashScreen(false);
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#020817';
+        ctx.fillRect(0, 0, 800, 600);
+        
+        ctx.fillStyle = '#0b1120';
+        ctx.fillRect(10, 10, 220, 580);
+        ctx.fillRect(240, 10, 550, 580);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('Forge Workspace Snapshot', 260, 50);
+        
+        ctx.fillStyle = '#00a1e0';
+        ctx.fillRect(260, 80, 200, 100);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('Active Org: ' + (org?.alias || 'Connected'), 280, 130);
+      }
+      
+      const base64 = canvas.toDataURL('image/png').split(',')[1];
+      const newAttachment = {
+        name: 'Workspace_Screenshot_' + Date.now() + '.png',
+        type: 'image/png',
+        base64: base64
+      };
+      
+      setAttachments(prev => [...prev, newAttachment]);
       setScreenshotAttached(true);
       triggerToast("📸 Workspace screenshot captured & attached!");
-    }, 3500); // 3.5s dramatic capture flash
+    }, 1500);
   };
 
   // File Picker change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const names = Array.from(e.target.files).map(f => f.name);
-      setAttachments(prev => [...prev, ...names]);
-      triggerToast(`📎 Attached ${names.length} file(s) successfully!`);
+      const filesArray = Array.from(e.target.files);
+      
+      filesArray.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          const newAttachment = {
+            name: file.name,
+            type: file.type,
+            base64: base64
+          };
+          setAttachments(prev => [...prev, newAttachment]);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      triggerToast(`📎 Attached ${filesArray.length} file(s) successfully!`);
       setShowMenu(false);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            const newAttachment = {
+              name: 'Clipboard_Image_' + Date.now() + '.png',
+              type: file.type,
+              base64: base64
+            };
+            setAttachments(prev => [...prev, newAttachment]);
+            setScreenshotAttached(true);
+            triggerToast("📸 Screenshot pasted from clipboard & attached!");
+          };
+          reader.readAsDataURL(file);
+        }
+      }
     }
   };
 
@@ -202,10 +272,15 @@ export function AIConversation() {
     const text = overridePrompt || input;
     if (!text.trim()) return;
 
+    const currentAttachments = [...attachments];
     setAttachments([]);
     setScreenshotAttached(false);
 
-    const userMessage = { role: 'user', content: text };
+    const userMessage = { 
+      role: 'user', 
+      content: text,
+      attachments: currentAttachments
+    };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
 
@@ -244,9 +319,15 @@ export function AIConversation() {
 
       // Save user message to database
       if (convoId) {
+        let dbContent = text;
+        if (currentAttachments.length > 0) {
+          currentAttachments.forEach((att: any) => {
+            dbContent += `\n\n[Attached File: ${att.name}]`;
+          });
+        }
         await supabase.from('messages').insert({
           role: 'user',
-          content: text,
+          content: dbContent,
           conversation_id: convoId
         });
       }
@@ -259,7 +340,8 @@ export function AIConversation() {
         body: JSON.stringify({ 
           messages: newMessages,
           orgId: org.id,
-          conversationId: convoId
+          conversationId: convoId,
+          attachments: currentAttachments
         }),
       });
 
@@ -461,6 +543,27 @@ export function AIConversation() {
                     : "bg-[#0b1120] border border-white/5 text-white rounded-tl-none",
                   msg.requiresOrgConnect && "border-red-500/30 shadow-red-500/5"
                 )}>
+                  {msg.role === 'user' && msg.attachments && msg.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {msg.attachments.map((att: any, attIdx: number) => (
+                        <div key={attIdx} className="relative group rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-md max-w-[240px]">
+                          {att.type?.startsWith('image/') ? (
+                            <img 
+                              src={`data:${att.type};base64,${att.base64}`} 
+                              alt={att.name} 
+                              className="max-h-[140px] object-cover rounded-lg block" 
+                            />
+                          ) : (
+                            <div className="p-3 text-[10px] text-white/80 flex items-center gap-2">
+                              <Paperclip className="w-3.5 h-3.5 text-[#00A1E0]" />
+                              <span className="truncate max-w-[150px]">{att.name}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="text-[13px] font-medium leading-relaxed prose prose-invert prose-p:leading-relaxed prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 max-w-none prose-headings:text-white prose-a:text-[#00a1e0] prose-strong:text-white">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {msg.content.split('<plan>')[0].trim()}
@@ -782,10 +885,10 @@ export function AIConversation() {
                         <button onClick={() => setScreenshotAttached(false)} className="ml-1 text-white/40 hover:text-white">&times;</button>
                       </span>
                     )}
-                    {attachments.map(file => (
-                      <span key={file} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-white/70 text-[9px] font-bold border border-white/10">
-                        <Paperclip className="w-2.5 h-2.5" /> {file}
-                        <button onClick={() => setAttachments(prev => prev.filter(f => f !== file))} className="ml-1 text-white/40 hover:text-white">&times;</button>
+                    {attachments.map((att: any) => (
+                      <span key={att.name} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-white/70 text-[9px] font-bold border border-white/10">
+                        <Paperclip className="w-2.5 h-2.5" /> {att.name}
+                        <button onClick={() => setAttachments(prev => prev.filter(f => f.name !== att.name))} className="ml-1 text-white/40 hover:text-white">&times;</button>
                       </span>
                     ))}
                   </div>
@@ -795,6 +898,7 @@ export function AIConversation() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                  onPaste={handlePaste}
                   placeholder={org ? "Describe what you want to build in your Salesforce org..." : "Type your request (connect an org first)..."}
                   disabled={loading}
                   className="flex-1 bg-transparent border-none focus:ring-0 text-white text-[13px] py-4 px-2 placeholder:text-white/10 resize-none min-h-[56px] no-scrollbar font-medium"

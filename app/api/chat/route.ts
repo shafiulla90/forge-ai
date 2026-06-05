@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { messages, orgId, conversationId } = await req.json();
+    const { messages, orgId, conversationId, attachments } = await req.json();
     if (!orgId || !messages) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
@@ -57,12 +57,46 @@ export async function POST(req: NextRequest) {
     
     const systemPrompt = buildSystemPrompt(org.alias, metadataSummary);
 
-    // 5. Stream Response (Sonnet)
-    // Clean messages to only include role and content to prevent Anthropic SDK validation errors
-    const cleanMessages = messages.map((m: any) => ({
-      role: m.role,
-      content: typeof m.content === 'string' ? m.content : ''
-    })).filter((m: any) => m.content.trim() !== '');
+    // Clean messages and format the user's latest message if it has attachments
+    const cleanMessages = messages.map((m: any, idx: number) => {
+      const isLastMessage = idx === messages.length - 1;
+      
+      if (isLastMessage && attachments && attachments.length > 0) {
+        const contentBlocks: any[] = [
+          { type: 'text', text: typeof m.content === 'string' ? m.content : '' }
+        ];
+        
+        attachments.forEach((att: any) => {
+          if (att.type && att.type.startsWith('image/')) {
+            contentBlocks.push({
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: att.type,
+                data: att.base64
+              }
+            });
+          } else {
+            contentBlocks[0].text += `\n\n[Attachment: ${att.name}]\n${att.base64}`;
+          }
+        });
+        
+        return {
+          role: m.role,
+          content: contentBlocks
+        };
+      }
+      
+      return {
+        role: m.role,
+        content: typeof m.content === 'string' ? m.content : ''
+      };
+    }).filter((m: any) => {
+      if (Array.isArray(m.content)) {
+        return m.content.some((b: any) => b.type === 'text' ? b.text.trim() !== '' : true);
+      }
+      return m.content.trim() !== '';
+    });
 
     const stream = streamChat(cleanMessages, systemPrompt);
 
