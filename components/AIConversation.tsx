@@ -69,6 +69,16 @@ export function AIConversation() {
   const [flashScreen, setFlashScreen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+    triggerToast("⏹ Chat generation stopped.");
+  };
 
   // Close plus menu on outside click
   useEffect(() => {
@@ -334,6 +344,9 @@ export function AIConversation() {
 
       const newMessages = [...messages, userMessage];
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -343,6 +356,7 @@ export function AIConversation() {
           conversationId: convoId,
           attachments: currentAttachments
         }),
+        signal: controller.signal
       });
 
       if (!response.ok) {
@@ -392,6 +406,7 @@ export function AIConversation() {
       console.error('Chat error:', err);
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -854,7 +869,7 @@ export function AIConversation() {
 
               <div className="flex-1 flex flex-col">
                 {/* Active Badges/Context Row */}
-                {(attachments.length > 0 || screenshotAttached || activeProject || selectedSkills.length > 0 || selectedStyle !== 'Professional' || webSearchEnabled) && (
+                {(activeProject || selectedSkills.length > 0 || selectedStyle !== 'Professional' || webSearchEnabled) && (
                   <div className="flex flex-wrap gap-1.5 px-2 pt-2 border-b border-white/5 pb-2 mb-1.5">
                     {webSearchEnabled && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#00a1e0]/10 text-[#00a1e0] text-[9px] font-bold border border-[#00a1e0]/20">
@@ -879,17 +894,41 @@ export function AIConversation() {
                         <button onClick={() => setSelectedSkills(prev => prev.filter(s => s !== skill))} className="ml-1 text-white/40 hover:text-white">&times;</button>
                       </span>
                     ))}
-                    {screenshotAttached && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 text-[9px] font-bold border border-red-500/20">
-                        <Camera className="w-2.5 h-2.5" /> Screenshot Attached
-                        <button onClick={() => setScreenshotAttached(false)} className="ml-1 text-white/40 hover:text-white">&times;</button>
-                      </span>
-                    )}
-                    {attachments.map((att: any) => (
-                      <span key={att.name} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-white/70 text-[9px] font-bold border border-white/10">
-                        <Paperclip className="w-2.5 h-2.5" /> {att.name}
-                        <button onClick={() => setAttachments(prev => prev.filter(f => f.name !== att.name))} className="ml-1 text-white/40 hover:text-white">&times;</button>
-                      </span>
+                  </div>
+                )}
+                
+                {/* Visual Attachment Preview Grid */}
+                {attachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2 px-2 pt-2 pb-1 border-b border-white/5">
+                    {attachments.map((att: any, attIdx: number) => (
+                      <div key={attIdx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-white/5 shadow-md w-14 h-14 shrink-0">
+                        {att.type?.startsWith('image/') ? (
+                          <img 
+                            src={`data:${att.type};base64,${att.base64}`} 
+                            alt={att.name} 
+                            className="w-full h-full object-cover block" 
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center p-1 bg-[#0b1120] text-center">
+                            <Paperclip className="w-3.5 h-3.5 text-[#00A1E0] mb-0.5" />
+                            <span className="text-[7px] text-white/80 truncate w-full px-1">{att.name}</span>
+                          </div>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setAttachments(prev => prev.filter((_, idx) => idx !== attIdx));
+                            const remaining = attachments.filter((_, idx) => idx !== attIdx);
+                            const hasImages = remaining.some(f => f.type?.startsWith('image/'));
+                            if (!hasImages) {
+                              setScreenshotAttached(false);
+                            }
+                          }}
+                          className="absolute top-0.5 right-0.5 bg-red-500 hover:bg-red-600 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px] font-bold shadow-md opacity-90 hover:opacity-100 transition-opacity"
+                        >
+                          &times;
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -906,11 +945,23 @@ export function AIConversation() {
                 />
               </div>
               <button 
-                onClick={() => handleSend()}
-                disabled={loading || !input.trim()}
-                className="mb-2 p-2.5 bg-[#00a1e0] text-white rounded-xl shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                onClick={loading ? handleStop : () => handleSend()}
+                disabled={!loading && !input.trim()}
+                className={cn(
+                  "mb-2 p-2.5 rounded-xl shadow-lg transition-all flex items-center justify-center border group",
+                  loading 
+                    ? "bg-red-500/20 border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:scale-105" 
+                    : "bg-[#00a1e0] border-transparent text-white hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                )}
               >
-                <Send className="w-4 h-4" />
+                {loading ? (
+                  <div className="relative w-4 h-4 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin block group-hover:hidden" />
+                    <div className="w-2.5 h-2.5 bg-red-500 group-hover:bg-white rounded-[2px] hidden group-hover:block" />
+                  </div>
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
