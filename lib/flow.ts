@@ -25,6 +25,9 @@ export async function normalizeFlowXml(xml: string): Promise<string> {
   }
 
   try {
+    if (!xml || xml.trim() === '') {
+      return xml;
+    }
     const parsed = await parseStringPromise(xml);
     if (parsed && parsed.Flow) {
       const visualKeys = [

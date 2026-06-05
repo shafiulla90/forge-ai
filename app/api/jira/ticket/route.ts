@@ -1494,12 +1494,25 @@ export async function GET(req: NextRequest) {
       let activeOrgId = '00000000-0000-0000-0000-000000000000';
       const { data: orgs } = await supabase
         .from('orgs')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
+        .select('*')
+        .eq('user_id', user.id);
 
-      if (orgs && orgs.length > 0) {
-        activeOrgId = orgs[0].id;
+      const devOrg = orgs?.find(o => {
+        const aliasLower = o.alias?.toLowerCase() || '';
+        const urlLower = o.instance_url?.toLowerCase() || '';
+        return !aliasLower.includes('qa') && 
+               !aliasLower.includes('shafi') && 
+               !aliasLower.includes('uat') && 
+               !aliasLower.includes('prod') &&
+               !urlLower.includes('qa') && 
+               !urlLower.includes('shafi') && 
+               !urlLower.includes('uat') &&
+               !urlLower.includes('prod') &&
+               o.org_type !== 'production';
+      }) || (orgs && orgs.length > 0 ? orgs[0] : null);
+
+      if (devOrg) {
+        activeOrgId = devOrg.id;
       }
 
       const { data: newDep, error: depErr } = await supabase
@@ -1645,12 +1658,25 @@ export async function POST(req: NextRequest) {
     if (!activeOrgId) {
       const { data: orgs } = await supabase
         .from('orgs')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
+        .select('*')
+        .eq('user_id', user.id);
       
-      if (orgs && orgs.length > 0) {
-        activeOrgId = orgs[0].id;
+      const devOrg = orgs?.find(o => {
+        const aliasLower = o.alias?.toLowerCase() || '';
+        const urlLower = o.instance_url?.toLowerCase() || '';
+        return !aliasLower.includes('qa') && 
+               !aliasLower.includes('shafi') && 
+               !aliasLower.includes('uat') && 
+               !aliasLower.includes('prod') &&
+               !urlLower.includes('qa') && 
+               !urlLower.includes('shafi') && 
+               !urlLower.includes('uat') &&
+               !urlLower.includes('prod') &&
+               o.org_type !== 'production';
+      }) || (orgs && orgs.length > 0 ? orgs[0] : null);
+      
+      if (devOrg) {
+        activeOrgId = devOrg.id;
       } else {
         // Fallback to a zero UUID if no org is connected yet
         activeOrgId = '00000000-0000-0000-0000-000000000000';

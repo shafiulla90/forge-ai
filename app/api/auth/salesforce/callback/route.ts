@@ -19,18 +19,28 @@ export async function GET(request: NextRequest) {
   }
 
   // Verify state parameter (CSRF protection)
+  const stateParam = searchParams.get('state') || '';
+  let stateObj: any = {};
+  try {
+    const decoded = Buffer.from(stateParam, 'base64url').toString('utf8');
+    stateObj = JSON.parse(decoded);
+  } catch (e) {
+    console.error('[SF Callback] Failed to decode state parameter:', e);
+  }
+
   const storedState = request.cookies.get('sf_oauth_state')?.value
   const codeVerifier = request.cookies.get('sf_code_verifier')?.value
-  const oauthLoginUrl = request.cookies.get('sf_oauth_login_url')?.value || process.env.SALESFORCE_LOGIN_URL || 'https://login.salesforce.com'
-  const customAlias = request.cookies.get('sf_oauth_alias')?.value
-  const stage = request.cookies.get('sf_oauth_stage')?.value || ''
-  const type = request.cookies.get('sf_oauth_type')?.value || ''
-  const cookieClientId = request.cookies.get('sf_oauth_client_id')?.value || ''
-  const cookieClientSecret = request.cookies.get('sf_oauth_client_secret')?.value || ''
+  const oauthLoginUrl = request.cookies.get('sf_oauth_login_url')?.value || stateObj.loginUrl || process.env.SALESFORCE_LOGIN_URL || 'https://login.salesforce.com'
+  const customAlias = request.cookies.get('sf_oauth_alias')?.value || stateObj.alias
+  const stage = request.cookies.get('sf_oauth_stage')?.value || stateObj.stage || ''
+  const type = request.cookies.get('sf_oauth_type')?.value || stateObj.type || ''
+  const cookieClientId = request.cookies.get('sf_oauth_client_id')?.value || stateObj.clientId || ''
+  const cookieClientSecret = request.cookies.get('sf_oauth_client_secret')?.value || stateObj.clientSecret || ''
 
-  if (storedState && storedState !== state) {
-    console.error('[SF Callback] State mismatch. Expected:', storedState, 'Got:', state)
-    return new NextResponse(`State mismatch. Expected: ${storedState}, Got: ${state}`, { status: 400 })
+  const stateToCompare = stateObj.csrf || state;
+  if (storedState && storedState !== stateToCompare) {
+    console.error('[SF Callback] State mismatch. Expected:', storedState, 'Got:', stateToCompare)
+    return new NextResponse(`State mismatch. Expected: ${storedState}, Got: ${stateToCompare}`, { status: 400 })
   } else if (!storedState) {
     console.warn('[SF Callback] Stored state cookie is missing (bypassing state verification).')
   }

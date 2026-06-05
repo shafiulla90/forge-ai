@@ -29,125 +29,328 @@ export function OrgPipeline() {
   const [uatProgress, setUatProgress] = useState(0);
   const [uatLogs, setUatLogs] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && ticketDetails?.key) {
-      const qDep = localStorage.getItem(`qa_deployed_${ticketDetails.key}`) === 'true';
-      const uDep = localStorage.getItem(`uat_deployed_${ticketDetails.key}`) === 'true';
-      setQaDeployed(qDep);
-      setUatDeployed(uDep);
-    }
-  }, [ticketDetails]);
+  const [qaActiveDeployId, setQaActiveDeployId] = useState<string | null>(null);
+  const [uatActiveDeployId, setUatActiveDeployId] = useState<string | null>(null);
 
-  const startQaDeployment = () => {
+  // Load QA and UAT deployment records when orgs or ticket changes
+  useEffect(() => {
+    if (!ticketDetails?.key || allOrgs.length === 0) return;
+    
+    async function loadPipelineDeployments() {
+      const qaOrg = allOrgs.find(o => 
+        o.alias?.toLowerCase().includes('qa') || 
+        o.instance_url?.toLowerCase().includes('qa') || 
+        o.alias?.toLowerCase().includes('shafi') || 
+        o.instance_url?.toLowerCase().includes('shafi')
+      );
+
+      const uatOrg = allOrgs.find(o => 
+        o.alias?.toLowerCase().includes('uat') || 
+        o.instance_url?.toLowerCase().includes('uat')
+      );
+
+      if (qaOrg) {
+        const { data: qaDep } = await supabase
+          .from('deployments')
+          .select('*')
+          .eq('org_id', qaOrg.id)
+          .eq('jira_ticket_id', ticketDetails.key)
+          .maybeSingle();
+
+        if (qaDep) {
+          if (qaDep.status === 'completed') {
+            setQaDeployed(true);
+            setQaDeploying(false);
+            setQaProgress(100);
+            setQaLogs(["Deployment succeeded (100% components verified and deployed)."]);
+          } else if (qaDep.status === 'in_progress' || qaDep.status === 'queued') {
+            setQaDeploying(true);
+            setQaActiveDeployId(qaDep.id);
+          } else if (qaDep.status === 'failed') {
+            setQaDeployed(false);
+            setQaDeploying(false);
+            setQaProgress(100);
+            const { data: steps } = await supabase
+              .from('deployment_steps')
+              .select('*')
+              .eq('deployment_id', qaDep.id)
+              .order('created_at', { ascending: true });
+            if (steps && steps.length > 0) {
+              setQaLogs(steps.map(s => {
+                if (s.status === 'error') return `[ERROR] ${s.description}: ${s.error_message || 'Failed'}`;
+                return `[SUCCESS] ${s.description}`;
+              }));
+            } else {
+              setQaLogs(["Deployment failed. Check Salesforce logs for details."]);
+            }
+          }
+        }
+      }
+
+      if (uatOrg) {
+        const { data: uatDep } = await supabase
+          .from('deployments')
+          .select('*')
+          .eq('org_id', uatOrg.id)
+          .eq('jira_ticket_id', ticketDetails.key)
+          .maybeSingle();
+
+        if (uatDep) {
+          if (uatDep.status === 'completed') {
+            setUatDeployed(true);
+            setUatDeploying(false);
+            setUatProgress(100);
+            setUatLogs(["UAT Deployment succeeded. Ready for business sign-off."]);
+          } else if (uatDep.status === 'in_progress' || uatDep.status === 'queued') {
+            setUatDeploying(true);
+            setUatActiveDeployId(uatDep.id);
+          } else if (uatDep.status === 'failed') {
+            setUatDeployed(false);
+            setUatDeploying(false);
+            setUatProgress(100);
+            const { data: steps } = await supabase
+              .from('deployment_steps')
+              .select('*')
+              .eq('deployment_id', uatDep.id)
+              .order('created_at', { ascending: true });
+            if (steps && steps.length > 0) {
+              setUatLogs(steps.map(s => {
+                if (s.status === 'error') return `[ERROR] ${s.description}: ${s.error_message || 'Failed'}`;
+                return `[SUCCESS] ${s.description}`;
+              }));
+            } else {
+              setUatLogs(["UAT Deployment failed. Check Salesforce UAT sandbox for details."]);
+            }
+          }
+        }
+      }
+    }
+
+    loadPipelineDeployments();
+  }, [ticketDetails?.key, allOrgs]);
+
+  // Polling for QA Deployment progress
+  useEffect(() => {
+    if (!qaActiveDeployId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { data: dep } = await supabase
+          .from('deployments')
+          .select('*')
+          .eq('id', qaActiveDeployId)
+          .single();
+
+        const { data: steps } = await supabase
+          .from('deployment_steps')
+          .select('*')
+          .eq('deployment_id', qaActiveDeployId)
+          .order('created_at', { ascending: true });
+
+        if (steps) {
+          const logs = steps.map(s => {
+            if (s.status === 'error') return `[ERROR] ${s.description}: ${s.error_message || 'Failed'}`;
+            if (s.status === 'running') return `[RUNNING] ${s.description}...`;
+            return `[SUCCESS] ${s.description}`;
+          });
+          setQaLogs(logs);
+
+          // Calculate progress
+          const totalSteps = steps.length;
+          const completedSteps = steps.filter(s => s.status === 'success' || s.status === 'error').length;
+          if (totalSteps > 0) {
+            const calculatedProgress = Math.min(100, Math.round((completedSteps / totalSteps) * 100));
+            setQaProgress(calculatedProgress);
+          }
+        }
+
+        if (dep) {
+          if (dep.status === 'completed') {
+            setQaDeploying(false);
+            setQaDeployed(true);
+            setQaProgress(100);
+            setQaActiveDeployId(null);
+            clearInterval(interval);
+          } else if (dep.status === 'failed') {
+            setQaDeploying(false);
+            setQaDeployed(false);
+            setQaActiveDeployId(null);
+            clearInterval(interval);
+          }
+        }
+      } catch (err) {
+        console.error("Error polling QA deployment:", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [qaActiveDeployId]);
+
+  // Polling for UAT Deployment progress
+  useEffect(() => {
+    if (!uatActiveDeployId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { data: dep } = await supabase
+          .from('deployments')
+          .select('*')
+          .eq('id', uatActiveDeployId)
+          .single();
+
+        const { data: steps } = await supabase
+          .from('deployment_steps')
+          .select('*')
+          .eq('deployment_id', uatActiveDeployId)
+          .order('created_at', { ascending: true });
+
+        if (steps) {
+          const logs = steps.map(s => {
+            if (s.status === 'error') return `[ERROR] ${s.description}: ${s.error_message || 'Failed'}`;
+            if (s.status === 'running') return `[RUNNING] ${s.description}...`;
+            return `[SUCCESS] ${s.description}`;
+          });
+          setUatLogs(logs);
+
+          // Calculate progress
+          const totalSteps = steps.length;
+          const completedSteps = steps.filter(s => s.status === 'success' || s.status === 'error').length;
+          if (totalSteps > 0) {
+            const calculatedProgress = Math.min(100, Math.round((completedSteps / totalSteps) * 100));
+            setUatProgress(calculatedProgress);
+          }
+        }
+
+        if (dep) {
+          if (dep.status === 'completed') {
+            setUatDeploying(false);
+            setUatDeployed(true);
+            setUatProgress(100);
+            setUatActiveDeployId(null);
+            clearInterval(interval);
+          } else if (dep.status === 'failed') {
+            setUatDeploying(false);
+            setUatDeployed(false);
+            setUatActiveDeployId(null);
+            clearInterval(interval);
+          }
+        }
+      } catch (err) {
+        console.error("Error polling UAT deployment:", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [uatActiveDeployId]);
+
+  const startQaDeployment = async () => {
     setQaDeploying(true);
     setQaProgress(0);
-    setQaLogs(["Initializing connection to covenantsynergyprivatelimited2--shafi.sandbox.my.salesforce.com..."]);
+    setQaLogs(["Initializing connection to QA Sandbox..."]);
 
     const targetId = deployment?.id || deployId;
     if (targetId && qaOrg?.id) {
       console.log(`[OrgPipeline] Triggering background Salesforce deployment to QA Sandbox: ${qaOrg.id}`);
-      fetch('/api/deploy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          deploymentId: targetId,
-          plan: plan,
-          targetOrgId: qaOrg.id
-        })
-      }).catch(err => console.error("QA background deployment error:", err));
-    }
-
-    const logSteps = [
-      "Authenticating via Local External Client App...",
-      "Resolving target metadata delta from Git branch feature/scrum-5...",
-      "Preparing deployment package (package.xml and source elements)...",
-      "Deploying Custom Field: Account.Account_Status__c (CustomField)...",
-      "Deploying Record-Triggered Flow: Auto_Update_Account_Status (Flow)...",
-      "Compiling classes and triggers in target sandbox...",
-      "Running Salesforce automated QA checks and regression tests...",
-      "Deployment succeeded (100% components verified and deployed)."
-    ];
-
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      setQaProgress(prev => {
-        const next = prev + 12.5;
-        if (next >= 100) {
-          clearInterval(interval);
-          setQaDeploying(false);
-          setQaDeployed(true);
-          if (typeof window !== 'undefined' && ticketDetails?.key) {
-            localStorage.setItem(`qa_deployed_${ticketDetails.key}`, 'true');
+      try {
+        const res = await fetch('/api/deploy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            deploymentId: targetId,
+            plan: plan,
+            targetOrgId: qaOrg.id
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.deploymentId) {
+            setQaActiveDeployId(data.deploymentId);
           }
-          return 100;
+        } else {
+          setQaLogs([`[ERROR] Failed to initiate deployment: ${res.statusText}`]);
+          setQaDeploying(false);
         }
-        return next;
-      });
-
-      if (currentStep < logSteps.length) {
-        setQaLogs(prev => [...prev, logSteps[currentStep]]);
-        currentStep++;
+      } catch (err: any) {
+        console.error("QA background deployment error:", err);
+        setQaLogs([`[ERROR] Failed to initiate deployment: ${err.message}`]);
+        setQaDeploying(false);
       }
-    }, 1000);
+    } else {
+      setQaLogs(["[ERROR] No target deployment or QA sandbox org found."]);
+      setQaDeploying(false);
+    }
   };
 
-  const startUatDeployment = () => {
+  const startUatDeployment = async () => {
     setUatDeploying(true);
     setUatProgress(0);
-    setUatLogs(["Initializing connection to covenantsynergyprivatelimited2--uat.sandbox.my.salesforce.com..."]);
+    setUatLogs(["Initializing connection to UAT Sandbox..."]);
 
     const targetId = deployment?.id || deployId;
     if (targetId && uatOrg?.id) {
       console.log(`[OrgPipeline] Triggering background Salesforce deployment to UAT Sandbox: ${uatOrg.id}`);
-      fetch('/api/deploy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          deploymentId: targetId,
-          plan: plan,
-          targetOrgId: uatOrg.id
-        })
-      }).catch(err => console.error("UAT background deployment error:", err));
-    }
-
-    const logSteps = [
-      "Authenticating via Local External Client App...",
-      "Resolving target metadata delta from Git branch feature/scrum-5...",
-      "Preparing UAT deployment package (package.xml)...",
-      "Deploying Custom Field: Account.Account_Status__c (CustomField)...",
-      "Deploying Record-Triggered Flow: Auto_Update_Account_Status (Flow)...",
-      "Compiling metadata in UAT Sandbox...",
-      "Running regression and compliance tests in UAT Sandbox...",
-      "UAT Deployment succeeded. Pending UAT checklist."
-    ];
-
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      setUatProgress(prev => {
-        const next = prev + 12.5;
-        if (next >= 100) {
-          clearInterval(interval);
-          setUatDeploying(false);
-          setUatDeployed(true);
-          if (typeof window !== 'undefined' && ticketDetails?.key) {
-            localStorage.setItem(`uat_deployed_${ticketDetails.key}`, 'true');
+      try {
+        const res = await fetch('/api/deploy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            deploymentId: targetId,
+            plan: plan,
+            targetOrgId: uatOrg.id
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.deploymentId) {
+            setUatActiveDeployId(data.deploymentId);
           }
-          return 100;
+        } else {
+          setUatLogs([`[ERROR] Failed to initiate deployment: ${res.statusText}`]);
+          setUatDeploying(false);
         }
-        return next;
-      });
-
-      if (currentStep < logSteps.length) {
-        setUatLogs(prev => [...prev, logSteps[currentStep]]);
-        currentStep++;
+      } catch (err: any) {
+        console.error("UAT background deployment error:", err);
+        setUatLogs([`[ERROR] Failed to initiate deployment: ${err.message}`]);
+        setUatDeploying(false);
       }
-    }, 1000);
+    } else {
+      setUatLogs(["[ERROR] No target deployment or UAT sandbox org found."]);
+      setUatDeploying(false);
+    }
   };
 
-  const resetPipeline = () => {
-    if (typeof window !== 'undefined' && ticketDetails?.key) {
-      localStorage.removeItem(`qa_deployed_${ticketDetails.key}`);
-      localStorage.removeItem(`uat_deployed_${ticketDetails.key}`);
+  const resetPipeline = async () => {
+    if (ticketDetails?.key) {
+      try {
+        const qaOrg = allOrgs.find(o => 
+          o.alias?.toLowerCase().includes('qa') || 
+          o.instance_url?.toLowerCase().includes('qa') || 
+          o.alias?.toLowerCase().includes('shafi') || 
+          o.instance_url?.toLowerCase().includes('shafi')
+        );
+
+        const uatOrg = allOrgs.find(o => 
+          o.alias?.toLowerCase().includes('uat') || 
+          o.instance_url?.toLowerCase().includes('uat')
+        );
+
+        if (qaOrg) {
+          await supabase
+            .from('deployments')
+            .delete()
+            .eq('org_id', qaOrg.id)
+            .eq('jira_ticket_id', ticketDetails.key);
+        }
+        if (uatOrg) {
+          await supabase
+            .from('deployments')
+            .delete()
+            .eq('org_id', uatOrg.id)
+            .eq('jira_ticket_id', ticketDetails.key);
+        }
+      } catch (err) {
+        console.error("Failed to reset deployments in DB:", err);
+      }
     }
     setQaDeployed(false);
     setUatDeployed(false);
@@ -155,6 +358,8 @@ export function OrgPipeline() {
     setQaLogs([]);
     setUatProgress(0);
     setUatLogs([]);
+    setQaActiveDeployId(null);
+    setUatActiveDeployId(null);
   };
 
   useEffect(() => {

@@ -67,7 +67,17 @@ export async function GET(request: Request) {
   const codeVerifier = base64URLEncode(verifierBuffer);
   const challengeBuffer = crypto.createHash('sha256').update(codeVerifier).digest();
   const codeChallenge = base64URLEncode(challengeBuffer);
-  const state = crypto.randomBytes(16).toString('hex');
+  const csrf = crypto.randomBytes(16).toString('hex');
+  const stateObj = {
+    csrf,
+    stage,
+    type,
+    alias,
+    clientId: customClientId.trim(),
+    clientSecret: customClientSecret.trim(),
+    loginUrl: targetLoginUrl
+  };
+  const state = Buffer.from(JSON.stringify(stateObj)).toString('base64url');
 
   console.log('[SF Auth] Type:', type, '| Login URL:', targetLoginUrl);
   console.log('[SF Auth] Client ID:', clientId.substring(0, 12) + '...');
@@ -98,7 +108,7 @@ export async function GET(request: Request) {
     path: '/',
   };
 
-  response.cookies.set('sf_oauth_state', state, cookieOpts);
+  response.cookies.set('sf_oauth_state', csrf, cookieOpts);
   response.cookies.set('sf_code_verifier', codeVerifier, cookieOpts);
   response.cookies.set('sf_oauth_login_url', targetLoginUrl, cookieOpts);
   response.cookies.set('sf_oauth_type', type, cookieOpts);

@@ -88,8 +88,21 @@ export async function POST(req: NextRequest) {
         console.log(`[Jira Approve] Creating dynamic deployment record for ticket: ${id}`);
         
         // Fetch Org
-        const { data: orgs } = await adminSupabase.from('orgs').select('*').limit(1);
-        const orgId = orgs && orgs.length > 0 ? orgs[0].id : null;
+        const { data: orgs } = await adminSupabase.from('orgs').select('*').eq('user_id', user.id);
+        const devOrg = orgs?.find(o => {
+          const aliasLower = o.alias?.toLowerCase() || '';
+          const urlLower = o.instance_url?.toLowerCase() || '';
+          return !aliasLower.includes('qa') && 
+                 !aliasLower.includes('shafi') && 
+                 !aliasLower.includes('uat') && 
+                 !aliasLower.includes('prod') &&
+                 !urlLower.includes('qa') && 
+                 !urlLower.includes('shafi') && 
+                 !urlLower.includes('uat') &&
+                 !urlLower.includes('prod') &&
+                 o.org_type !== 'production';
+        }) || (orgs && orgs.length > 0 ? orgs[0] : null);
+        const orgId = devOrg ? devOrg.id : null;
 
         const jira = await createJiraClient(user.id);
         let liveSummary = `Deployment plan for ${id}`;
