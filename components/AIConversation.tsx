@@ -604,9 +604,42 @@ export function AIConversation() {
                           if (safeSrc.includes('pollinations.ai')) {
                             safeSrc = safeSrc.replace(/\+/g, '%20');
                           }
+                          
+                          // Extract keywords for fallback from the prompt path
+                          let keywords = 'design';
+                          try {
+                            const urlObj = new URL(safeSrc);
+                            const pathParts = urlObj.pathname.split('/');
+                            const lastPart = pathParts[pathParts.length - 1];
+                            if (lastPart) {
+                              const decoded = decodeURIComponent(lastPart).replace(/[^a-zA-Z0-9,\s]/g, '');
+                              const parts = decoded.split(/[,\s+]+/);
+                              keywords = parts.slice(0, 3).join(',');
+                            }
+                          } catch (e) {
+                            if (alt) {
+                              const parts = alt.replace(/[^a-zA-Z0-9,\s]/g, '').split(/[,\s+]+/);
+                              keywords = parts.slice(0, 3).join(',');
+                            }
+                          }
+                          
+                          const fallbackUrl = `https://loremflickr.com/800/600/${encodeURIComponent(keywords || 'design')}`;
+
                           return (
                             <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
-                              <img src={safeSrc} alt={alt} className="w-full h-auto max-h-[360px] object-contain block" suppressHydrationWarning />
+                              <img 
+                                src={safeSrc} 
+                                alt={alt} 
+                                className="w-full h-auto max-h-[360px] object-contain block" 
+                                suppressHydrationWarning 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  if (target.src !== fallbackUrl) {
+                                    console.log('Image load failed. Falling back to:', fallbackUrl);
+                                    target.src = fallbackUrl;
+                                  }
+                                }}
+                              />
                             </div>
                           );
                         }
