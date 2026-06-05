@@ -38,9 +38,12 @@ import remarkGfm from 'remark-gfm';
 const preprocessMarkdown = (content: string): string => {
   if (!content) return '';
   return content.replace(/(!?\[.*?\])\((.*?)\)/g, (match, label, url) => {
-    if (url.includes(' ') && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'))) {
-      const encodedUrl = url.replace(/\s/g, '%20');
-      return `${label}(${encodedUrl})`;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+      let safeUrl = url.replace(/\s/g, '%20');
+      if (safeUrl.includes('pollinations.ai')) {
+        safeUrl = safeUrl.replace(/\+/g, '%20');
+      }
+      return `${label}(${safeUrl})`;
     }
     return match;
   });
@@ -583,7 +586,10 @@ export function AIConversation() {
                       remarkPlugins={[remarkGfm]}
                       components={{
                         a: ({ href, children }) => {
-                          const safeHref = href && typeof href === 'string' ? href.replace(/\s/g, '%20') : '';
+                          let safeHref = href && typeof href === 'string' ? href.replace(/\s/g, '%20') : '';
+                          if (safeHref.includes('pollinations.ai')) {
+                            safeHref = safeHref.replace(/\+/g, '%20');
+                          }
                           if (safeHref && (safeHref.endsWith('.mp4') || safeHref.includes('mixkit.co'))) {
                             return (
                               <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg max-w-full">
@@ -594,7 +600,10 @@ export function AIConversation() {
                           return <a href={safeHref} target="_blank" rel="noopener noreferrer" className="text-[#00a1e0] hover:underline font-bold">{children}</a>;
                         },
                         img: ({ src, alt }) => {
-                          const safeSrc = src && typeof src === 'string' ? src.replace(/\s/g, '%20') : '';
+                          let safeSrc = src && typeof src === 'string' ? src.replace(/\s/g, '%20') : '';
+                          if (safeSrc.includes('pollinations.ai')) {
+                            safeSrc = safeSrc.replace(/\+/g, '%20');
+                          }
                           return (
                             <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
                               <img src={safeSrc} alt={alt} className="w-full h-auto max-h-[360px] object-contain block" suppressHydrationWarning />
