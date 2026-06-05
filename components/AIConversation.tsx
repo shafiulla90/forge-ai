@@ -294,27 +294,15 @@ export function AIConversation() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
 
-    if (!org) {
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: "I need to connect to your Salesforce Org first to read its metadata.\n\nPlease click the **Connect Org** button in the navigation bar to securely link your Salesforce environment.",
-          requiresOrgConnect: true
-        }]);
-      }, 500);
-      return;
-    }
-
     setLoading(true);
 
     try {
       let convoId = currentConvoId;
-      
       // Client-Side Conversation Creation
       if (!convoId) {
         const { data: newConvo } = await supabase.from('conversations').insert({
           user_id: (await getCurrentUser(supabase))?.id,
-          org_id: org.id,
+          org_id: org?.id || null,
           title: text.substring(0, 50) + (text.length > 50 ? '...' : '')
         }).select().single();
         
@@ -352,7 +340,7 @@ export function AIConversation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: newMessages,
-          orgId: org.id,
+          orgId: org?.id || null,
           conversationId: convoId,
           attachments: currentAttachments
         }),
@@ -580,7 +568,28 @@ export function AIConversation() {
                   )}
 
                   <div className="text-[13px] font-medium leading-relaxed prose prose-invert prose-p:leading-relaxed prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 max-w-none prose-headings:text-white prose-a:text-[#00a1e0] prose-strong:text-white">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ href, children }) => {
+                          if (href && (href.endsWith('.mp4') || href.includes('mixkit.co'))) {
+                            return (
+                              <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg max-w-full">
+                                <video src={href} controls className="w-full h-auto max-h-[360px] block" />
+                              </div>
+                            );
+                          }
+                          return <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#00a1e0] hover:underline font-bold">{children}</a>;
+                        },
+                        img: ({ src, alt }) => {
+                          return (
+                            <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
+                              <img src={src} alt={alt} className="w-full h-auto max-h-[360px] object-contain block" suppressHydrationWarning />
+                            </div>
+                          );
+                        }
+                      }}
+                    >
                       {msg.content.split('<plan>')[0].trim()}
                     </ReactMarkdown>
                   </div>

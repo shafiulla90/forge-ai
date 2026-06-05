@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { messages, orgId, conversationId, attachments } = await req.json();
-    if (!orgId || !messages) {
+    if (!messages) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
@@ -23,30 +23,39 @@ export async function POST(req: NextRequest) {
     if (!activeConversationId) {
       const { data: newConvo } = await supabase.from('conversations').insert({
         user_id: user.id,
-        org_id: orgId,
+        org_id: orgId || null,
         title: messages[messages.length - 1].content.substring(0, 50) + '...'
       }).select().single();
       if (newConvo) activeConversationId = newConvo.id;
     }
 
-    // 2. Get Org Info
-    const { data: org, error: orgError } = await supabase
-      .from('orgs')
-      .select('*')
-      .eq('id', orgId)
-      .single();
+    // 2. Get Org Info (if orgId is provided)
+    let org: any = null;
+    let relevantMetadata: any[] = [];
+    let intent = { type: 'question', confidence: 1.0 };
 
-    if (orgError || !org) {
-      return NextResponse.json({ error: 'Org not found' }, { status: 404 });
+    if (orgId) {
+      const { data: orgData } = await supabase
+        .from('orgs')
+        .select('*')
+        .eq('id', orgId)
+        .maybeSingle();
+      org = orgData;
     }
 
     const lastMessage = messages[messages.length - 1].content;
 
-    // 3. Detect Intent (Haiku) & Search Metadata (RAG)
-    const [intent, relevantMetadata] = await Promise.all([
-      detectIntent(lastMessage),
-      searchRelevantMetadata(orgId, lastMessage),
-    ]);
+    // 3. Detect Intent & Search Metadata (only if org is connected)
+    if (org) {
+      const [intentData, relevantMetadataData] = await Promise.all([
+        detectIntent(lastMessage),
+        searchRelevantMetadata(orgId, lastMessage),
+      ]);
+      intent = intentData;
+      relevantMetadata = relevantMetadataData;
+    } else {
+      intent = await detectIntent(lastMessage);
+    }
 
     console.log(`[Chat] Detected intent: ${intent.type} (Confidence: ${intent.confidence})`);
 
@@ -55,7 +64,7 @@ export async function POST(req: NextRequest) {
       .map((m: any) => `- ${m.metadata_type}: ${m.api_name}`)
       .join('\n');
     
-    const systemPrompt = buildSystemPrompt(org.alias, metadataSummary);
+    const systemPrompt = buildSystemPrompt(org?.alias || 'General Workspace', metadataSummary);
 
     // Clean messages and format the user's latest message if it has attachments
     const cleanMessages = messages.map((m: any, idx: number) => {
