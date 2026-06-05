@@ -35,6 +35,17 @@ import { getActiveOrg, getCurrentUser } from '@/lib/supabase-helpers';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+const preprocessMarkdown = (content: string): string => {
+  if (!content) return '';
+  return content.replace(/(!?\[.*?\])\((.*?)\)/g, (match, label, url) => {
+    if (url.includes(' ') && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'))) {
+      const encodedUrl = url.replace(/\s/g, '%20');
+      return `${label}(${encodedUrl})`;
+    }
+    return match;
+  });
+};
+
 const quickActions = [
   { icon: Box, title: 'Create custom object', desc: 'New object with fields, layouts, and permissions', color: 'text-orange-500', prompt: 'Help me create a new custom object for tracking...' },
   { icon: Workflow, title: 'Build automation flow', desc: 'Triggered, scheduled, or screen Flow', color: 'text-blue-500', prompt: 'I want to build a Flow that triggers when...' },
@@ -572,25 +583,27 @@ export function AIConversation() {
                       remarkPlugins={[remarkGfm]}
                       components={{
                         a: ({ href, children }) => {
-                          if (href && (href.endsWith('.mp4') || href.includes('mixkit.co'))) {
+                          const safeHref = href && typeof href === 'string' ? href.replace(/\s/g, '%20') : '';
+                          if (safeHref && (safeHref.endsWith('.mp4') || safeHref.includes('mixkit.co'))) {
                             return (
                               <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg max-w-full">
-                                <video src={href} controls className="w-full h-auto max-h-[360px] block" />
+                                <video src={safeHref} controls className="w-full h-auto max-h-[360px] block" />
                               </div>
                             );
                           }
-                          return <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#00a1e0] hover:underline font-bold">{children}</a>;
+                          return <a href={safeHref} target="_blank" rel="noopener noreferrer" className="text-[#00a1e0] hover:underline font-bold">{children}</a>;
                         },
                         img: ({ src, alt }) => {
+                          const safeSrc = src && typeof src === 'string' ? src.replace(/\s/g, '%20') : '';
                           return (
                             <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-white/5 shadow-lg max-w-full">
-                              <img src={src} alt={alt} className="w-full h-auto max-h-[360px] object-contain block" suppressHydrationWarning />
+                              <img src={safeSrc} alt={alt} className="w-full h-auto max-h-[360px] object-contain block" suppressHydrationWarning />
                             </div>
                           );
                         }
                       }}
                     >
-                      {msg.content.split('<plan>')[0].trim()}
+                      {preprocessMarkdown(msg.content.split('<plan>')[0].trim())}
                     </ReactMarkdown>
                   </div>
 

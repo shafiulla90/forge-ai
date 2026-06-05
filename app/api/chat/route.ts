@@ -156,13 +156,25 @@ export async function POST(req: NextRequest) {
         // Update message with full content and plan
         if (messageId) {
           try {
-            await adminSupabase.from('messages').update({
+            // Convert float confidence (e.g. 0.0 - 1.0) to an integer percentage (e.g. 0 - 100) to match the INT database column
+            const confidenceScore = typeof intent.confidence === 'number'
+              ? Math.round(intent.confidence * 100)
+              : null;
+
+            console.log(`[Chat] Updating message ${messageId} with fullResponse length: ${fullResponse.length}, plan: ${!!plan}, confidenceScore: ${confidenceScore}`);
+            const { data, error } = await adminSupabase.from('messages').update({
               content: fullResponse,
               implementation_plan: plan,
-              confidence_score: intent.confidence
-            }).eq('id', messageId);
+              confidence_score: confidenceScore
+            }).eq('id', messageId).select();
+            
+            if (error) {
+              console.error(`[Chat] Error updating message ${messageId}:`, error);
+            } else {
+              console.log(`[Chat] Message ${messageId} updated successfully. Rows:`, data?.length);
+            }
           } catch (e) {
-            console.error('[Chat] Failed to update message', e);
+            console.error('[Chat] Exception while updating message:', e);
           }
         }
 
