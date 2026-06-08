@@ -61,6 +61,129 @@ const preprocessMarkdown = (content: string): string => {
   });
 };
 
+const SafeVideoPlayer = ({ src, fallback }: { src: string; fallback: React.ReactNode }) => {
+  const [hasError, setHasError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkVideo() {
+      try {
+        const separator = src.includes('?') ? '&' : '?';
+        const checkUrl = `${src}${separator}check=true`;
+        
+        const res = await fetch(checkUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.exists) {
+            setHasError(true);
+          }
+        } else {
+          setHasError(true);
+        }
+      } catch (e) {
+        setHasError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkVideo();
+  }, [src]);
+
+  if (hasError) {
+    return <>{fallback}</>;
+  }
+
+  if (loading) {
+    return (
+      <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black/40 h-[120px] flex flex-col items-center justify-center gap-2">
+        <Loader2 className="w-5 h-5 text-[#00a1e0] animate-spin" />
+        <span className="text-[10px] text-white/40">Resolving video stream...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg max-w-full">
+      <video 
+        src={src} 
+        controls 
+        className="w-full h-auto max-h-[360px] block" 
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+};
+
+const getDebugMetadata = (msg: any, userPrompt: string) => {
+  if (msg.debug) {
+    return {
+      ...msg.debug,
+      userPrompt: msg.debug.userPrompt || userPrompt
+    };
+  }
+  
+  const content = msg.content || '';
+  
+  // Extract image prompt & url
+  const imgMatch = content.match(/!\[(.*?)\]\(\/api\/chat\/image\?q=(.*?)\)/);
+  let imagePrompt = '';
+  let imageUrl = '';
+  let imageProvider = 'None';
+  if (imgMatch) {
+    try {
+      imagePrompt = decodeURIComponent(imgMatch[2]).replace(/\+/g, ' ');
+    } catch (e) {
+      imagePrompt = imgMatch[2];
+    }
+    imageUrl = `/api/chat/image?q=${imgMatch[2]}`;
+    imageProvider = 'Pollinations AI';
+  }
+  
+  // Extract video prompt & url
+  const vidMatch = content.match(/\[\!\[Video\]\(.*?\)\]\(\/api\/chat\/video\?q=(.*?)\)/) ||
+                   content.match(/\[\!\[Video\]\(.*?\)\]\((.*?)\)/);
+  let videoPrompt = '';
+  let videoUrl = '';
+  let videoProvider = 'None';
+  if (vidMatch) {
+    const matchedUrl = vidMatch[1];
+    if (matchedUrl.includes('/api/chat/video')) {
+      try {
+        const urlObj = new URL(matchedUrl, 'http://localhost');
+        videoPrompt = decodeURIComponent(urlObj.searchParams.get('q') || '').replace(/\+/g, ' ');
+      } catch (e) {
+        const qParam = matchedUrl.split('q=')[1];
+        if (qParam) {
+          try {
+            videoPrompt = decodeURIComponent(qParam.split('&')[0]).replace(/\+/g, ' ');
+          } catch (ex) {
+            videoPrompt = qParam.split('&')[0];
+          }
+        }
+      }
+      videoUrl = matchedUrl;
+      videoProvider = 'Local Video Search API';
+    } else if (matchedUrl.includes('mixkit.co') || matchedUrl.endsWith('.mp4')) {
+      videoUrl = matchedUrl;
+      videoProvider = 'External Stock Video CDN';
+    }
+  }
+
+  if (imagePrompt || videoPrompt) {
+    return {
+      userPrompt: userPrompt || 'Derived from context',
+      classifiedIntent: 'question',
+      imageProvider,
+      imagePrompt,
+      imageUrl,
+      videoProvider,
+      videoPrompt,
+      videoUrl
+    };
+  }
+  return null;
+};
+
 const quickActions = [
   { icon: Box, title: 'Create custom object', desc: 'New object with fields, layouts, and permissions', color: 'text-orange-500', prompt: 'Help me create a new custom object for tracking...' },
   { icon: Workflow, title: 'Build automation flow', desc: 'Triggered, scheduled, or screen Flow', color: 'text-blue-500', prompt: 'I want to build a Flow that triggers when...' },
@@ -596,17 +719,15 @@ export function AIConversation() {
                   <div className="text-[13px] font-medium leading-relaxed prose prose-invert prose-p:leading-relaxed prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 max-w-none prose-headings:text-white prose-a:text-[#00a1e0] prose-strong:text-white">
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
-                      components={{
+                  components={{
                         a: ({ href, children }) => {
                           let safeHref = href && typeof href === 'string' ? href.replace(/\s/g, '%20') : '';
                           if (safeHref.includes('pollinations.ai')) {
                             safeHref = safeHref.replace(/\+/g, '%20');
                           }
-                          if (safeHref && (safeHref.endsWith('.mp4') || safeHref.includes('mixkit.co'))) {
+                          if (safeHref && (safeHref.endsWith('.mp4') || safeHref.includes('mixkit.co') || safeHref.includes('/api/chat/video'))) {
                             return (
-                              <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg max-w-full">
-                                <video src={safeHref} controls className="w-full h-auto max-h-[360px] block" />
-                              </div>
+                              <SafeVideoPlayer src={safeHref} fallback={null} />
                             );
                           }
                           return <a href={safeHref} target="_blank" rel="noopener noreferrer" className="text-[#00a1e0] hover:underline font-bold">{children}</a>;
@@ -741,6 +862,35 @@ export function AIConversation() {
                       </div>
                     </div>
                   )}
+
+                  {/* Media Pipeline Debugger */}
+                  {msg.role === 'assistant' && (() => {
+                    const userPrompt = messages[idx - 1]?.content || 'Derived from context';
+                    const debugInfo = getDebugMetadata(msg, userPrompt);
+                    if (!debugInfo) return null;
+                    return (
+                      <div className="mt-4 pt-4 border-t border-white/5 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                          <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Media Pipeline Debugger</span>
+                        </div>
+                        <div className="bg-black/30 border border-white/5 rounded-xl p-3 font-mono text-[9px] text-cyan-200/90 leading-relaxed overflow-x-auto max-w-full">
+                          <div className="grid grid-cols-1 gap-1.5">
+                            <div><span className="text-white/40">userPrompt:</span> <span className="text-white break-words">{debugInfo.userPrompt}</span></div>
+                            <div><span className="text-white/40">classifiedIntent:</span> <span className="text-cyan-400 font-bold">{debugInfo.classifiedIntent}</span></div>
+                            <div className="border-t border-white/5 my-1" />
+                            <div><span className="text-white/40">imageProvider:</span> <span className="text-yellow-400 font-bold">{debugInfo.imageProvider}</span></div>
+                            <div><span className="text-white/40">imagePrompt:</span> <span className="text-white/80">{debugInfo.imagePrompt || 'N/A'}</span></div>
+                            <div><span className="text-white/40">imageUrl:</span> <a href={debugInfo.imageUrl} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline break-all">{debugInfo.imageUrl || 'N/A'}</a></div>
+                            <div className="border-t border-white/5 my-1" />
+                            <div><span className="text-white/40">videoProvider:</span> <span className="text-purple-400 font-bold">{debugInfo.videoProvider}</span></div>
+                            <div><span className="text-white/40">videoPrompt:</span> <span className="text-white/80">{debugInfo.videoPrompt || 'N/A'}</span></div>
+                            <div><span className="text-white/40">videoUrl:</span> <a href={debugInfo.videoUrl} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline break-all">{debugInfo.videoUrl || 'N/A'}</a></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
